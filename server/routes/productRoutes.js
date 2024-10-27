@@ -6,7 +6,10 @@ const router = express.Router();
 // Route to get all products with filtering, sorting, and searching
 router.get('/api/products', async (req, res) => {
   try {
+    //get the query parameters from the request
     const { category, genre, brand, search, sortBy, sortOrder, minPrice, maxPrice } = req.query;
+
+    //create a query object to filter the products
     let query = {};
 
     // Filtering
@@ -24,6 +27,7 @@ router.get('/api/products', async (req, res) => {
     // Searching
     if (search) {
       query.$or = [
+        //search by name, description, category, or brand
         { name: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
         { category: { $regex: search, $options: 'i' } },
@@ -34,13 +38,17 @@ router.get('/api/products', async (req, res) => {
     // Sorting
     let sort = {};
     if (sortBy) {
-      sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+      if (sortOrder === 'desc') {
+        sort[sortBy] = -1;
+      } else {
+        sort[sortBy] = 1;
+      }
     }
-
-    const products = await Product.find(query)
-      .sort(sort)
-      .select('name price image category genre brand description quantity'); // Explicitly select fields we want to return
-
+    //find the products that match the query
+    const products = await Product.find(query)  
+    .sort(sort)
+    .select('name price image category genre brand description quantity'); // Explicitly select fields we want to return
+    //generate a json object with the count of products and the products
     res.json({
       count: products.length,
       products: products
