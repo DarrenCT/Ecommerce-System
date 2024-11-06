@@ -1,67 +1,38 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import NavBar from './components/NavBar';
+import Sidebar from './components/Sidebar';
+import ProductCard from './components/ProductCard';
 
 const App = () => {
   const [products, setProducts] = useState([]);
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
 
-  // Function to fetch products from the backend
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get('/api/products');
-      setProducts(response.data);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
-
-  // Fetch products when the component mounts
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('/api/products');
+        setProducts(response.data.products);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
     fetchProducts();
   }, []);
 
-  // Function to add a new product
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    try {
-      const newProduct = { name, price: Number(price) };
-      await axios.post('/api/products', newProduct);
-      fetchProducts(); // Refresh product list after adding a new product
-      setName('');
-      setPrice('');
-    } catch (error) {
-      console.error('Error adding product:', error);
-    }
-  };
-
   return (
-    <div>
-      <h1>Product List</h1>
-      <ul>
-        {products.map((product) => (
-          <li key={product._id}>
-            {product.name} - ${product.price}
-          </li>
-        ))}
-      </ul>
-
-      <h2>Add a New Product</h2>
-      <form onSubmit={handleAddProduct}>
-        <input
-          type="text"
-          placeholder="Product Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Product Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-        />
-        <button type="submit">Add Product</button>
-      </form>
+    <div className="min-h-screen bg-gray-50">
+      <NavBar />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 p-6">
+          <h2 className="text-2xl font-semibold mb-6">Popular Products</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {products.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
