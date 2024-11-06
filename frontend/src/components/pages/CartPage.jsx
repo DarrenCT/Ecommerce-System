@@ -2,12 +2,20 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Trash2 } from 'lucide-react';
 
+/**
+ * CartPage Component
+ * Displays the shopping cart contents and checkout section
+ * Handles cart operations like updating quantities and removing items
+ */
 const CartPage = () => {
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Get cartId from localStorage or create new one
+    /**
+     * Retrieves cartId from localStorage or creates a new cart
+     * @returns {Promise<string|null>} The cart ID or null if creation fails
+     */
     const getCartId = async () => {
         let cartId = localStorage.getItem('cartId');
         if (!cartId) {
@@ -16,6 +24,10 @@ const CartPage = () => {
         return cartId;
     };
 
+    /**
+     * Creates a new cart on the server
+     * @returns {Promise<string|null>} The new cart ID or null if creation fails
+     */
     const createNewCart = async () => {
         try {
             const response = await axios.post('/api/cart');
@@ -29,6 +41,9 @@ const CartPage = () => {
         }
     };
 
+    /**
+     * Fetches the current cart data from the server
+     */
     const fetchCart = async () => {
         try {
             setLoading(true);
@@ -47,6 +62,11 @@ const CartPage = () => {
         }
     };
 
+    /**
+     * Updates the quantity of an item in the cart
+     * @param {string} productId - The ID of the product to update
+     * @param {number} newQuantity - The new quantity to set
+     */
     const updateQuantity = async (productId, newQuantity) => {
         try {
             const cartId = await getCartId();
@@ -59,6 +79,10 @@ const CartPage = () => {
         }
     };
 
+    /**
+     * Removes an item from the cart
+     * @param {string} productId - The ID of the product to remove
+     */
     const removeItem = async (productId) => {
         try {
             const cartId = await getCartId();
@@ -69,10 +93,12 @@ const CartPage = () => {
         }
     };
 
+    // Initial cart fetch on component mount
     useEffect(() => {
         fetchCart();
     }, []);
 
+    // Loading and error states
     if (loading) return <div>Loading cart...</div>;
     if (error) return <div>Error: {error}</div>;
     if (!cart) return <div>No cart found</div>;
@@ -123,14 +149,17 @@ const CartPage = () => {
                                         </div>
                                     </div>
                                     <div className="text-lg font-bold">
-                                        ${item.product.price.toFixed(2)}
+                                        ${(item.product.price * item.quantity).toFixed(2)}
+                                        <div className="text-sm text-gray-500">
+                                            ${item.product.price.toFixed(2)} each
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         ))}
 
                         <div className="text-right text-xl mt-4">
-                            Subtotal ({cart.items.length} items):
+                            Subtotal ({cart.items.reduce((acc, item) => acc + item.quantity, 0)} items):
                             <span className="font-bold">
                                 ${cart.totalAmount.toFixed(2)}
                             </span>
@@ -141,7 +170,7 @@ const CartPage = () => {
                     <div className="lg:w-72">
                         <div className="bg-white p-4 rounded-lg shadow-sm">
                             <div className="text-lg mb-4">
-                                Subtotal ({cart.items.length} items):
+                                Subtotal ({cart.items.reduce((acc, item) => acc + item.quantity, 0)} items):
                                 <span className="font-bold">
                                     ${cart.totalAmount.toFixed(2)}
                                 </span>
