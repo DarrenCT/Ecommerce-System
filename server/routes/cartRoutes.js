@@ -88,8 +88,10 @@ router.put('/api/cart/:cartId/items/:productId', async (req, res) => {
         if (quantity < 0) {
             return res.status(400).json({ message: 'Invalid quantity' });
         }
-
-        let cart = await Cart.findOne({ userId: req.params.userId });
+        
+        //will use userId in the future
+        //let cart = await Cart.findOne({ userId: req.params.userId });
+        let cart = await Cart.findOne({ cartId: req.params.cartId });
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
         }
@@ -127,7 +129,9 @@ router.put('/api/cart/:cartId/items/:productId', async (req, res) => {
 // Remove item from cart
 router.delete('/api/cart/:cartId/items/:productId', async (req, res) => {
     try {
-        let cart = await Cart.findOne({ userId: req.params.userId });
+        //will use userId in the future
+        //let cart = await Cart.findOne({ userId: req.params.userId });
+        let cart = await Cart.findOne({ cartId: req.params.cartId });
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
         }
