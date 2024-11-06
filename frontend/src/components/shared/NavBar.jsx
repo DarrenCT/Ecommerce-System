@@ -1,12 +1,17 @@
-// Icons from lucide-react library
+import { Link } from 'react-router-dom';
 import { Search, ShoppingCart, User } from "lucide-react"
+import { useAuth } from '../../context/DevAuthContext';
 
 const NavBar = () => {
+    const { user, isAuthenticated, login, logout } = useAuth();
+
     return (
         <nav className="w-full bg-amazon text-white sticky top-0 z-50">
             <div className="flex items-center justify-between p-2 max-w-[1500px] mx-auto">
                 <div className="flex items-center">
-                    <h1 className="text-2xl font-bold">E-Store</h1>
+                    <Link to="/" className="text-2xl font-bold hover:text-amazon-yellow">
+                        E-Store
+                    </Link>
                 </div>
 
                 <div className="flex flex-1 items-center max-w-2xl mx-4">
@@ -21,21 +26,24 @@ const NavBar = () => {
                         className="h-10 flex-1 px-4 text-black"
                     />
                     <button className="h-10 px-4 bg-amazon-yellow hover:bg-amazon-orange rounded-r-md">
-                        {/* Search icon from lucide-react */}
                         <Search className="h-5 w-5 text-black" />
                     </button>
                 </div>
 
                 <div className="flex items-center space-x-6">
-                    <button className="flex items-center space-x-1">
-                        {/* Shopping Cart icon from lucide-react */}
+                    <Link
+                        to="/cart"
+                        className="flex items-center space-x-1 hover:text-amazon-yellow"
+                    >
                         <ShoppingCart className="h-6 w-6" />
                         <span>Cart</span>
-                    </button>
-                    <button className="flex items-center space-x-1">
-                        {/* User icon from lucide-react */}
+                    </Link>
+                    <button
+                        onClick={isAuthenticated ? logout : login}
+                        className="flex items-center space-x-1"
+                    >
                         <User className="h-6 w-6" />
-                        <span>Profile</span>
+                        <span>{isAuthenticated ? 'Logout' : 'Login'}</span>
                     </button>
                 </div>
             </div>
