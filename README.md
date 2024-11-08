@@ -59,3 +59,14 @@ Start frontend dev server
 - `npm run dev`
 
 Follow local link to test app
+
+## Dataset Used
+@article{collins2022abo,
+  title={ABO: Dataset and Benchmarks for Real-World 3D Object Understanding},
+  author={Collins, Jasmine and Goel, Shubham and Deng, Kenan and Luthra, Achleshwar and
+          Xu, Leon and Gundogdu, Erhan and Zhang, Xi and Yago Vicente, Tomas F and
+          Dideriksen, Thomas and Arora, Himanshu and Guillaumin, Matthieu and
+          Malik, Jitendra},
+  journal={CVPR},
+  year={2022}
+}
