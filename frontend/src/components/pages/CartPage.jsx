@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 /**
  * CartPage Component
@@ -123,13 +124,22 @@ const CartPage = () => {
                         {cart.items.map((item) => (
                             <div key={item.product._id} className="py-4 border-b">
                                 <div className="flex gap-4">
-                                    <img
-                                        src={item.product.main_image || 'https://via.placeholder.com/400'}
-                                        alt={item.product.item_name[0]?.value || 'Product Image'}
-                                        className="w-32 h-32 object-contain"
-                                    />
+                                    <Link to={`/product/${item.product._id}`} className="w-32 h-32">
+                                        <img
+                                            src={item.product.main_image || 'https://via.placeholder.com/400'}
+                                            alt={item.product.item_name[0]?.value || 'Product Image'}
+                                            className="w-full h-full object-contain hover:opacity-90 transition-opacity"
+                                        />
+                                    </Link>
                                     <div className="flex-grow">
-                                        <h3 className="text-lg font-medium">{item.product.item_name[0]?.value || 'Product Name'}</h3>
+                                        <Link
+                                            to={`/product/${item.product._id}`}
+                                            className="hover:text-amazon-light hover:underline"
+                                        >
+                                            <h3 className="text-lg font-medium">
+                                                {item.product.item_name[0]?.value || 'Product Name'}
+                                            </h3>
+                                        </Link>
                                         <div className="text-sm mt-1">
                                             {item.product.quantity > 0 ? (
                                                 <span className="text-green-600">
