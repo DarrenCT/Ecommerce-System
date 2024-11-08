@@ -98,6 +98,12 @@ const CartPage = () => {
         fetchCart();
     }, []);
 
+    useEffect(() => {
+        if (cart) {
+            console.log(cart.items.map(item => item.product.main_image));
+        }
+    }, [cart]);
+
     // Loading and error states
     if (loading) return <div>Loading cart...</div>;
     if (error) return <div>Error: {error}</div>;
@@ -118,12 +124,12 @@ const CartPage = () => {
                             <div key={item.product._id} className="py-4 border-b">
                                 <div className="flex gap-4">
                                     <img
-                                        src={item.product.image}
-                                        alt={item.product.name}
+                                        src={item.product.main_image || 'https://via.placeholder.com/400'}
+                                        alt={item.product.item_name[0]?.value || 'Product Image'}
                                         className="w-32 h-32 object-contain"
                                     />
                                     <div className="flex-grow">
-                                        <h3 className="text-lg font-medium">{item.product.name}</h3>
+                                        <h3 className="text-lg font-medium">{item.product.item_name[0]?.value || 'Product Name'}</h3>
                                         <div className="text-sm text-green-600 mt-1">
                                             In Stock
                                         </div>
