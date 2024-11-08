@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/api/cart/:cartId', async (req, res) => {
     try {
         let cart = await Cart.findOne({ cartId: req.params.cartId })
-            .populate('items.product', 'item_name price main_image');
+            .populate('items.product', 'item_name price main_image quantity');
         
         if (!cart) {
             cart = new Cart({ 
@@ -82,7 +82,7 @@ router.post('/api/cart/:cartId/items', async (req, res) => {
 
         await cart.calculateTotalAmount();
         await cart.save();
-        cart = await cart.populate('items.product', 'item_name price main_image');
+        cart = await cart.populate('items.product', 'item_name price main_image quantity');
         
         res.json(cart);
     } catch (error) {
@@ -129,7 +129,7 @@ router.put('/api/cart/:cartId/items/:productId', async (req, res) => {
         await cart.calculateTotalAmount();
         await cart.save();
 
-        cart = await cart.populate('items.product', 'item_name price main_image');
+        cart = await cart.populate('items.product', 'item_name price main_image quantity');
         
         res.json(cart);
     } catch (error) {
@@ -154,7 +154,7 @@ router.delete('/api/cart/:cartId/items/:productId', async (req, res) => {
         await cart.calculateTotalAmount();
         await cart.save();
 
-        cart = await cart.populate('items.product', 'item_name price main_image');
+        cart = await cart.populate('items.product', 'item_name price main_image quantity');
         
         res.json(cart);
     } catch (error) {

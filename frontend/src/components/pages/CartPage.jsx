@@ -130,8 +130,14 @@ const CartPage = () => {
                                     />
                                     <div className="flex-grow">
                                         <h3 className="text-lg font-medium">{item.product.item_name[0]?.value || 'Product Name'}</h3>
-                                        <div className="text-sm text-green-600 mt-1">
-                                            In Stock
+                                        <div className="text-sm mt-1">
+                                            {item.product.quantity > 0 ? (
+                                                <span className="text-green-600">
+                                                    In Stock ({item.product.quantity} available)
+                                                </span>
+                                            ) : (
+                                                <span className="text-red-600">Out of Stock</span>
+                                            )}
                                         </div>
                                         <div className="flex gap-4 mt-2">
                                             <select
@@ -139,9 +145,9 @@ const CartPage = () => {
                                                 value={item.quantity}
                                                 onChange={(e) => updateQuantity(item.product._id, Number(e.target.value))}
                                             >
-                                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                                                    <option key={num} value={num}>
-                                                        Qty: {num}
+                                                {Array.from({ length: Math.max(1, Math.min(10, item.product.quantity || 0)) }, (_, i) => (
+                                                    <option key={i + 1} value={i + 1}>
+                                                        Qty: {i + 1}
                                                     </option>
                                                 ))}
                                             </select>
