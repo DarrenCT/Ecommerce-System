@@ -26,7 +26,7 @@ const ProductCard = ({ product }) => {
             <img
                 src={product.image || 'https://via.placeholder.com/400'}
                 alt={product.name}
-                className="w-full h-48 object-cover rounded-md mb-4"
+                className="w-full h-48 object-contain rounded-md mb-4"
             />
             <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
             <p className="text-2xl font-bold text-amazon-light">${product.price}</p>
