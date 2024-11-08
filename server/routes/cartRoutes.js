@@ -9,10 +9,9 @@ const router = express.Router();
 router.get('/api/cart/:cartId', async (req, res) => {
     try {
         let cart = await Cart.findOne({ cartId: req.params.cartId })
-            .populate('items.product', 'name price image');
+            .populate('items.product', 'item_name price main_image');
         
         if (!cart) {
-            // Create new cart with unique ID if none exists
             cart = new Cart({ 
                 cartId: req.params.cartId, 
                 items: [] 
@@ -22,6 +21,18 @@ router.get('/api/cart/:cartId', async (req, res) => {
         
         await cart.calculateTotalAmount();
         await cart.save();
+        
+        // Transform the cart items to include properly formatted images
+        cart = cart.toObject(); // Convert to plain object for manipulation
+        cart.items = cart.items.map(item => ({
+            ...item,
+            product: {
+                ...item.product,
+                main_image: item.product.main_image 
+                    ? `data:image/jpeg;base64,${item.product.main_image.toString('base64')}`
+                    : null
+            }
+        }));
         
         res.json(cart);
     } catch (error) {
@@ -71,7 +82,7 @@ router.post('/api/cart/:cartId/items', async (req, res) => {
 
         await cart.calculateTotalAmount();
         await cart.save();
-        cart = await cart.populate('items.product', 'name price image');
+        cart = await cart.populate('items.product', 'item_name price main_image');
         
         res.json(cart);
     } catch (error) {
@@ -118,7 +129,7 @@ router.put('/api/cart/:cartId/items/:productId', async (req, res) => {
         await cart.calculateTotalAmount();
         await cart.save();
 
-        cart = await cart.populate('items.product', 'name price image');
+        cart = await cart.populate('items.product', 'item_name price main_image');
         
         res.json(cart);
     } catch (error) {
@@ -143,7 +154,7 @@ router.delete('/api/cart/:cartId/items/:productId', async (req, res) => {
         await cart.calculateTotalAmount();
         await cart.save();
 
-        cart = await cart.populate('items.product', 'name price image');
+        cart = await cart.populate('items.product', 'item_name price main_image');
         
         res.json(cart);
     } catch (error) {
