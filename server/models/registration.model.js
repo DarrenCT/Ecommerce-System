@@ -1,11 +1,17 @@
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from 'uuid';
 
-const userSchema = new mongoose.Schema({
+const registrationSchema = new mongoose.Schema({
+    userId: {
+        type: String,
+        default: () => uuidv4(),  
+        unique: truecd 
+    },
     email: {
         type: String,
         required: true,
         unique: true,
-        match: /.+\@.+\..+/ // basic email validation
+        match: /.+\@.+\..+/ // Basic email validation
     },
     password: {
         type: String,
@@ -27,10 +33,8 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
-
 });
 
+const User = mongoose.model('User', registrationSchema);
 
-
-const User = mongoose.model('User', userSchema);
 export default User;
