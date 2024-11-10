@@ -3,6 +3,7 @@ import NavBar from './components/shared/NavBar';
 import Sidebar from './components/shared/Sidebar';
 import ProductCatalog from './components/pages/ProductCatalog';
 import CartPage from './components/pages/CartPage';
+import ProductDetailsPage from './components/pages/ProductDetailsPage';
 import { DevAuthProvider } from './context/DevAuthContext';
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<ProductCatalog />} />
                 <Route path="/cart" element={<CartPage />} />
+                <Route path="/product/:id" element={<ProductDetailsPage />} />
               </Routes>
             </main>
           </div>
