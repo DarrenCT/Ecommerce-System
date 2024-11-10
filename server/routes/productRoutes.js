@@ -6,52 +6,21 @@ const router = express.Router();
 // Route to get all products with filtering, sorting, and searching
 router.get('/api/products', async (req, res) => {
   try {
-    //get the query parameters from the request
-    const { category, genre, brand, search, sortBy, sortOrder, minPrice, maxPrice } = req.query;
+    const products = await Product.find({})
+      .limit(12)
+      .select('item_name price main_image brand');
 
-    //create a query object to filter the products
-    let query = {};
+    const transformedProducts = products.map(product => ({
+      _id: product._id,
+      name: product.item_name[0]?.value || 'Unknown Product',
+      price: product.price,
+      image: `data:image/jpeg;base64,${product.main_image.toString('base64')}`,
+      brand: product.brand[0]?.value || 'Unknown Brand'
+    }));
 
-    // Filtering
-    if (category) query.category = category;
-    if (genre) query.genre = genre;
-    if (brand) query.brand = brand;
-
-    // Price range filtering
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice);
-      if (maxPrice) query.price.$lte = Number(maxPrice);
-    }
-
-    // Searching
-    if (search) {
-      query.$or = [
-        //search by name, description, category, or brand
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { category: { $regex: search, $options: 'i' } },
-        { brand: { $regex: search, $options: 'i' } }
-      ];
-    }
-
-    // Sorting
-    let sort = {};
-    if (sortBy) {
-      if (sortOrder === 'desc') {
-        sort[sortBy] = -1;
-      } else {
-        sort[sortBy] = 1;
-      }
-    }
-    //find the products that match the query
-    const products = await Product.find(query)  
-    .sort(sort)
-    .select('name price image category genre brand description quantity'); // Explicitly select fields we want to return
-    //generate a json object with the count of products and the products
     res.json({
-      count: products.length,
-      products: products
+      count: transformedProducts.length,
+      products: transformedProducts
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
