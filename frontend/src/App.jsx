@@ -5,6 +5,7 @@ import ProductCatalog from './components/pages/ProductCatalog';
 import CartPage from './components/pages/CartPage';
 import ProductDetailsPage from './components/pages/ProductDetailsPage';
 import { DevAuthProvider } from './context/DevAuthContext';
+import SearchResults from './components/pages/SearchResults';
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
                 <Route path="/" element={<ProductCatalog />} />
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/product/:id" element={<ProductDetailsPage />} />
+                <Route path="/search" element={<SearchResults />} />
               </Routes>
             </main>
           </div>
