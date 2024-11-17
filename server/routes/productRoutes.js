@@ -6,19 +6,29 @@ const router = express.Router();
 // Search route MUST come before the :id route
 router.get('/api/products/search', async (req, res) => {
   try {
-    const { q } = req.query;
+    const { q, page = 1, limit = 12 } = req.query;
     if (!q) {
       return res.status(400).json({ message: 'Search query is required' });
     }
 
     const searchRegex = new RegExp(q, 'i');
+    
+    // Get total count for pagination
+    const totalProducts = await Product.countDocuments({
+      $or: [
+        { 'item_name.value': searchRegex },
+        { 'brand.value': searchRegex }
+      ]
+    });
+
     const products = await Product.find({
       $or: [
         { 'item_name.value': searchRegex },
         { 'brand.value': searchRegex }
       ]
     })
-    .limit(12)
+    .skip((page - 1) * limit)
+    .limit(parseInt(limit))
     .select('item_name price main_image brand');
 
     const transformedProducts = products.map(product => ({
@@ -30,11 +40,16 @@ router.get('/api/products/search', async (req, res) => {
     }));
 
     res.json({
-      count: transformedProducts.length,
-      products: transformedProducts
+      products: transformedProducts,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalProducts / limit),
+        totalProducts,
+        hasNextPage: page * limit < totalProducts,
+        hasPrevPage: page > 1
+      }
     });
   } catch (error) {
-    console.error('Search error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
