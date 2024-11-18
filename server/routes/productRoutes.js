@@ -29,14 +29,15 @@ router.get('/api/products/search', async (req, res) => {
     })
     .skip((page - 1) * limit)
     .limit(parseInt(limit))
-    .select('item_name price main_image brand');
+    .select('item_name price main_image brand node');
 
     const transformedProducts = products.map(product => ({
       _id: product._id,
       name: product.item_name[0]?.value || 'Unknown Product',
       price: product.price,
       image: product.main_image ? `data:image/jpeg;base64,${product.main_image.toString('base64')}` : null,
-      brand: product.brand[0]?.value || 'Unknown Brand'
+      brand: product.brand[0]?.value || 'Unknown Brand',
+      node: product.node || []
     }));
 
     res.json({
