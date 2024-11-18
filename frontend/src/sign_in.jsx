@@ -1,21 +1,21 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import './registration.css';
+import './sign_in.css';
 
 function SignInPage() {
-  // State for form fields
+  // form fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Handle form submission
+  // form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Sending sign-in data to backend:", { email, password });
     try {
-      const response = await axios.post('/login', { email, password });
+      const response = await axios.post('http://localhost:5000/sign_in', { email, password });
       setSuccess(response.data.message);
       setError('');
       setEmail('');
