@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import ProductCard from '../shared/ProductCard';
+import FilterSideBar from '../shared/FilterSideBar';
 
 /**
  * ProductCatalog Component
@@ -57,33 +58,12 @@ const ProductCatalog = () => {
 
     return (
         <div className="w-full flex">
-            {/* Category Sidebar */}
-            <div className="w-64 min-h-screen bg-gray-100 p-4 border-r">
-                <h3 className="text-lg font-semibold mb-4">Category</h3>
-                <div className="max-h-[calc(100vh-8rem)] overflow-y-auto">
-                    {categories.map((category) => (
-                        <div key={category} className="mb-2">
-                            <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-200 p-2 rounded">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedCategories.has(category)}
-                                    onChange={() => {
-                                        const newSelectedCategories = new Set(selectedCategories);
-                                        if (selectedCategories.has(category)) {
-                                            newSelectedCategories.delete(category);
-                                        } else {
-                                            newSelectedCategories.add(category);
-                                        }
-                                        setSelectedCategories(newSelectedCategories);
-                                    }}
-                                    className="form-checkbox text-amazon-yellow"
-                                />
-                                <span className="text-gray-700">{category}</span>
-                            </label>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            <FilterSideBar
+                title="Category"
+                items={categories}
+                selectedItems={selectedCategories}
+                onSelectionChange={setSelectedCategories}
+            />
 
             {/* Product Grid */}
             <div className="flex-1 p-6">
