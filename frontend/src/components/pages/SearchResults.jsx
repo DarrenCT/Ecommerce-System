@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import ProductCard from '../shared/ProductCard';
 import FilterSideBar from '../shared/FilterSideBar';
-import SortControl from '../shared/SortControl'; // Import SortControl
+import SortControl from '../shared/SortControl';
 
 const SearchResults = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -13,7 +13,7 @@ const SearchResults = () => {
     const [pagination, setPagination] = useState(null);
     const [categories, setCategories] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState(new Set());
-    const [sortOrder, setSortOrder] = useState('none'); // 'asc', 'desc', 'none'
+    const [sortOrder, setSortOrder] = useState('none'); // 'price-asc', 'price-desc', 'name-asc', 'name-desc', 'none'
 
     const query = searchParams.get('q');
     const currentPage = parseInt(searchParams.get('page')) || 1;
@@ -91,12 +91,18 @@ const SearchResults = () => {
 
     // Sort the products based on sortOrder
     const sortedProducts = [...products].sort((a, b) => {
-        if (sortOrder === 'asc') {
-            return a.price - b.price;
-        } else if (sortOrder === 'desc') {
-            return b.price - a.price;
+        switch (sortOrder) {
+            case 'price-asc':
+                return a.price - b.price;
+            case 'price-desc':
+                return b.price - a.price;
+            case 'name-asc':
+                return a.name.localeCompare(b.name);
+            case 'name-desc':
+                return b.name.localeCompare(a.name);
+            default:
+                return 0; // No sorting
         }
-        return 0; // No sorting
     });
 
     if (loading) return <div className="text-center py-4">Loading...</div>;
