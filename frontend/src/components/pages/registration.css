@@ -1,0 +1,95 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  background-color: hsl(0, 0%, 100%);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.registration-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%; 
+  padding: 20px;
+}
+
+.registration-box {
+  background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+  padding: 15px 20px; 
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 550px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.registration-box h2 {
+  margin-top: 5px; /* reduced margin-top to bring closer to container */
+  margin-bottom: 15px;
+  font-size: 50px;
+  font-family: Impact, Haettenschweiler, 'Arial Bold', sans-serif;
+  background: linear-gradient(to top, #cf4091, #0d0b71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+
+.registration-box form div {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.registration-box label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  color: #051734;
+}
+
+.registration-box input,
+.registration-box textarea {
+  width: 100%;
+  max-width: 500px; /* Set input fields to adapt to box width */
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #3b3a3a;
+  font-size: 1em;
+  box-sizing: border-box;
+  background-color: #f9f9f9;
+  color: #000000;
+}
+
+.registration-box button {
+  width: 100%;
+  padding: 12px;
+  background-color: #012344;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.registration-box button:hover {
+  background-color: #cf4091;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .registration-box h2 {
+      font-size: 36px; /* Smaller font size on smaller screens */
+  }
+
+  .registration-box input,
+  .registration-box textarea {
+      max-width: 100%; /* Make input fields fill the container width */
+  }
+}
