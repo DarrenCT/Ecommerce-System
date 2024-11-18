@@ -104,4 +104,27 @@ router.get('/api/products/:id', async (req, res) => {
   }
 });
 
+// Add this new route to get unique categories
+router.get('/api/categories', async (req, res) => {
+  try {
+    const products = await Product.find({}, 'node');
+    const categories = new Set();
+    
+    products.forEach(product => {
+      if (product.node && product.node[0] && product.node[0].node_name) {
+        const nodePath = product.node[0].node_name.split('/');
+        if (nodePath[2]) {
+          categories.add(nodePath[2]);
+        }
+      }
+    });
+
+    res.json({
+      categories: Array.from(categories).sort()
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching categories', error: error.message });
+  }
+});
+
 export default router;
