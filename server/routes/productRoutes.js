@@ -13,14 +13,26 @@ router.get('/api/products/search', async (req, res) => {
 
     const searchRegex = new RegExp(q, 'i');
     
-    // Get total count for pagination
-    const totalProducts = await Product.countDocuments({
+    // Get all products matching search for categories (without pagination)
+    const allMatchingProducts = await Product.find({
       $or: [
         { 'item_name.value': searchRegex },
         { 'brand.value': searchRegex }
       ]
+    }).select('node');
+
+    // Extract all unique categories
+    const categories = new Set();
+    allMatchingProducts.forEach(product => {
+      if (product.node && product.node[0] && product.node[0].node_name) {
+        const nodePath = product.node[0].node_name.split('/');
+        if (nodePath[2]) {
+          categories.add(nodePath[2]);
+        }
+      }
     });
 
+    // Get paginated products
     const products = await Product.find({
       $or: [
         { 'item_name.value': searchRegex },
@@ -42,11 +54,12 @@ router.get('/api/products/search', async (req, res) => {
 
     res.json({
       products: transformedProducts,
+      categories: Array.from(categories).sort(),
       pagination: {
         currentPage: parseInt(page),
-        totalPages: Math.ceil(totalProducts / limit),
-        totalProducts,
-        hasNextPage: page * limit < totalProducts,
+        totalPages: Math.ceil(allMatchingProducts.length / limit),
+        totalProducts: allMatchingProducts.length,
+        hasNextPage: page * limit < allMatchingProducts.length,
         hasPrevPage: page > 1
       }
     });
