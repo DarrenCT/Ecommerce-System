@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import ProductCard from '../shared/ProductCard';
 import FilterSideBar from '../shared/FilterSideBar';
+import SortControl from '../shared/SortControl'; // Import SortControl
 
 const SearchResults = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -12,6 +13,7 @@ const SearchResults = () => {
     const [pagination, setPagination] = useState(null);
     const [categories, setCategories] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState(new Set());
+    const [sortOrder, setSortOrder] = useState('none'); // 'asc', 'desc', 'none'
 
     const query = searchParams.get('q');
     const currentPage = parseInt(searchParams.get('page')) || 1;
@@ -83,6 +85,20 @@ const SearchResults = () => {
         );
     };
 
+    const handleSortChange = (e) => {
+        setSortOrder(e.target.value);
+    };
+
+    // Sort the products based on sortOrder
+    const sortedProducts = [...products].sort((a, b) => {
+        if (sortOrder === 'asc') {
+            return a.price - b.price;
+        } else if (sortOrder === 'desc') {
+            return b.price - a.price;
+        }
+        return 0; // No sorting
+    });
+
     if (loading) return <div className="text-center py-4">Loading...</div>;
     if (error) return <div className="text-center text-red-600 py-4">{error}</div>;
     if (!query) return <div className="text-center py-4">Please enter a search term</div>;
@@ -106,14 +122,17 @@ const SearchResults = () => {
                     )}
                 </h2>
 
-                {products.length === 0 ? (
+                {/* Sort Control */}
+                <SortControl sortOrder={sortOrder} onSortChange={handleSortChange} />
+
+                {sortedProducts.length === 0 ? (
                     <div className="text-center text-gray-600">
                         No products found matching your search
                     </div>
                 ) : (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {products.map((product) => (
+                            {sortedProducts.map((product) => (
                                 <ProductCard key={product._id} product={product} />
                             ))}
                         </div>
