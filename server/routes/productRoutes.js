@@ -59,21 +59,25 @@ router.get('/api/products', async (req, res) => {
   try {
     const products = await Product.find({})
       .limit(12)
-      .select('item_name price main_image brand');
+      .select('item_name price main_image brand node');
 
     const transformedProducts = products.map(product => ({
       _id: product._id,
       name: product.item_name[0]?.value || 'Unknown Product',
       price: product.price,
       image: product.main_image ? `data:image/jpeg;base64,${product.main_image.toString('base64')}` : null,
-      brand: product.brand[0]?.value || 'Unknown Brand'
+      brand: product.brand[0]?.value || 'Unknown Brand',
+      node: product.node || []
     }));
+
+    console.log('Transformed products node data:', transformedProducts.map(p => p.node));
 
     res.json({
       count: transformedProducts.length,
       products: transformedProducts
     });
   } catch (error) {
+    console.error('Server error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
