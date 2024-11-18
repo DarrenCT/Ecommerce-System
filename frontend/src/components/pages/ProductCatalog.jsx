@@ -26,7 +26,7 @@ const ProductCatalog = () => {
             const uniqueCategories = [...new Set(productsData.map(product => {
                 if (product.node && product.node[0] && product.node[0].node_name) {
                     const nodePath = product.node[0].node_name.split('/');
-                    return nodePath[2];
+                    return nodePath[3];
                 }
                 return null;
             }))].filter(Boolean);
@@ -47,7 +47,7 @@ const ProductCatalog = () => {
         ? products.filter(product => {
             if (product.node && product.node[0] && product.node[0].node_name) {
                 const nodePath = product.node[0].node_name.split('/');
-                return selectedCategories.has(nodePath[2]);
+                return selectedCategories.has(nodePath[3]);
             }
             return false;
         })

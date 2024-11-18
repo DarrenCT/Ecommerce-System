@@ -34,7 +34,7 @@ router.get('/api/products/search', async (req, res) => {
     allMatchingProducts.forEach(product => {
       if (product.node?.[0]?.node_name) {
         const nodePath = product.node[0].node_name.split('/');
-        if (nodePath[2]) categories.add(nodePath[2]);
+        if (nodePath[3]) categories.add(nodePath[3]);
       }
     });
 
@@ -129,8 +129,8 @@ router.get('/api/categories', async (req, res) => {
     products.forEach(product => {
       if (product.node && product.node[0] && product.node[0].node_name) {
         const nodePath = product.node[0].node_name.split('/');
-        if (nodePath[2]) {
-          categories.add(nodePath[2]);
+        if (nodePath[3]) {
+          categories.add(nodePath[3]);
         }
       }
     });
