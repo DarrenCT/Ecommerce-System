@@ -36,19 +36,7 @@ const SearchResults = () => {
                 setProducts(response.data.products);
                 setPagination(response.data.pagination);
 
-                // Extract unique categories from search results
-                const uniqueCategories = [...new Set(response.data.products
-                    .map(product => {
-                        if (product.node && product.node[0] && product.node[0].node_name) {
-                            const nodePath = product.node[0].node_name.split('/');
-                            return nodePath[2];
-                        }
-                        return null;
-                    })
-                    .filter(Boolean))];
-                setCategories(uniqueCategories);
-
-                console.log('Extracted Categories:', uniqueCategories);
+                setCategories(response.data.categories || []);
 
                 console.log('Search Response:', response.data);
             } catch (error) {
