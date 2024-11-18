@@ -10,7 +10,7 @@ import SearchResults from './components/pages/SearchResults';
 // Create a separate component for the layout that uses useLocation
 const AppLayout = () => {
   const location = useLocation();
-  const showGeneralSidebar = location.pathname !== '/';
+  const showGeneralSidebar = location.pathname !== '/' && location.pathname !== '/search';
 
   return (
     <div className="min-h-screen bg-gray-50">
