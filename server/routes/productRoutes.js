@@ -57,9 +57,20 @@ router.get('/api/products/search', async (req, res) => {
 // General products route
 router.get('/api/products', async (req, res) => {
   try {
-    const products = await Product.find({})
-      .limit(12)
-      .select('item_name price main_image brand node');
+    // Get total count of products
+    const totalProducts = await Product.countDocuments({});
+    
+    // Get 12 random products using aggregation pipeline
+    const products = await Product.aggregate([
+      { $sample: { size: 12 } },
+      { $project: {
+        item_name: 1,
+        price: 1,
+        main_image: 1,
+        brand: 1,
+        node: 1
+      }}
+    ]);
 
     const transformedProducts = products.map(product => ({
       _id: product._id,
@@ -69,8 +80,6 @@ router.get('/api/products', async (req, res) => {
       brand: product.brand[0]?.value || 'Unknown Brand',
       node: product.node || []
     }));
-
-    console.log('Transformed products node data:', transformedProducts.map(p => p.node));
 
     res.json({
       count: transformedProducts.length,
