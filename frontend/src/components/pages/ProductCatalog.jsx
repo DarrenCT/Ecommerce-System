@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import ProductCard from '../shared/ProductCard';
 import FilterSideBar from '../shared/FilterSideBar';
+import SortControl from '../shared/SortControl';
 
 /**
  * ProductCatalog Component
@@ -13,6 +14,7 @@ const ProductCatalog = () => {
     const [loading, setLoading] = useState(true);
     const [categories, setCategories] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState(new Set());
+    const [sortOrder, setSortOrder] = useState('none'); // 'asc', 'desc', 'none'
 
     const fetchProducts = async () => {
         try {
@@ -42,6 +44,11 @@ const ProductCatalog = () => {
         fetchProducts();
     }, []);
 
+    // Function to handle sort change
+    const handleSortChange = (e) => {
+        setSortOrder(e.target.value);
+    };
+
     // Filter products based on selected category
     const filteredProducts = selectedCategories.size > 0
         ? products.filter(product => {
@@ -52,6 +59,16 @@ const ProductCatalog = () => {
             return false;
         })
         : products;
+
+    // Sort the filtered products based on sortOrder
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+        if (sortOrder === 'asc') {
+            return a.price - b.price;
+        } else if (sortOrder === 'desc') {
+            return b.price - a.price;
+        }
+        return 0; // No sorting
+    });
 
     if (loading) return <div>Loading products...</div>;
 
@@ -79,8 +96,12 @@ const ProductCatalog = () => {
                         Refresh Products
                     </button>
                 </div>
+
+                {/* Sort Control */}
+                <SortControl sortOrder={sortOrder} onSortChange={handleSortChange} />
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredProducts.map((product) => (
+                    {sortedProducts.map((product) => (
                         <ProductCard key={product._id} product={product} />
                     ))}
                 </div>
