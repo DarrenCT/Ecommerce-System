@@ -14,7 +14,7 @@ const ProductCatalog = () => {
     const [loading, setLoading] = useState(true);
     const [categories, setCategories] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState(new Set());
-    const [sortOrder, setSortOrder] = useState('none'); // 'asc', 'desc', 'none'
+    const [sortOrder, setSortOrder] = useState('none'); // 'price-asc', 'price-desc', 'name-asc', 'name-desc', 'none'
 
     const fetchProducts = async () => {
         try {
@@ -62,12 +62,18 @@ const ProductCatalog = () => {
 
     // Sort the filtered products based on sortOrder
     const sortedProducts = [...filteredProducts].sort((a, b) => {
-        if (sortOrder === 'asc') {
-            return a.price - b.price;
-        } else if (sortOrder === 'desc') {
-            return b.price - a.price;
+        switch (sortOrder) {
+            case 'price-asc':
+                return a.price - b.price;
+            case 'price-desc':
+                return b.price - a.price;
+            case 'name-asc':
+                return a.name.localeCompare(b.name);
+            case 'name-desc':
+                return b.name.localeCompare(a.name);
+            default:
+                return 0; // No sorting
         }
-        return 0; // No sorting
     });
 
     if (loading) return <div>Loading products...</div>;
@@ -87,7 +93,7 @@ const ProductCatalog = () => {
                     <h2 className="text-2xl font-semibold">
                         {selectedCategories.size > 0
                             ? Array.from(selectedCategories).join(' & ')
-                            : 'Random Products'}
+                            : 'All Products'}
                     </h2>
                     <button
                         onClick={fetchProducts}
