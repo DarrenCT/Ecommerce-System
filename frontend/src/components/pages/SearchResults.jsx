@@ -16,29 +16,21 @@ const SearchResults = () => {
     const query = searchParams.get('q');
     const currentPage = parseInt(searchParams.get('page')) || 1;
 
-    // Filter products based on selected categories
-    const filteredProducts = selectedCategories.size > 0
-        ? products.filter(product => {
-            if (product.node && product.node[0] && product.node[0].node_name) {
-                const nodePath = product.node[0].node_name.split('/');
-                return selectedCategories.has(nodePath[2]);
-            }
-            return false;
-        })
-        : products;
-
     useEffect(() => {
         const fetchSearchResults = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await axios.get(`/api/products/search?q=${encodeURIComponent(query)}&page=${currentPage}`);
+                const response = await axios.get(`/api/products/search`, {
+                    params: {
+                        q: query,
+                        page: currentPage,
+                        categories: Array.from(selectedCategories).join(',')
+                    }
+                });
                 setProducts(response.data.products);
                 setPagination(response.data.pagination);
-
                 setCategories(response.data.categories || []);
-
-                console.log('Search Response:', response.data);
             } catch (error) {
                 setError(error.response?.data?.message || 'Failed to fetch search results');
             } finally {
@@ -51,7 +43,7 @@ const SearchResults = () => {
         } else {
             setLoading(false);
         }
-    }, [query, currentPage]);
+    }, [query, currentPage, selectedCategories]);
 
     const handlePageChange = (newPage) => {
         setSearchParams({ q: query, page: newPage.toString() });
@@ -114,14 +106,14 @@ const SearchResults = () => {
                     )}
                 </h2>
 
-                {filteredProducts.length === 0 ? (
+                {products.length === 0 ? (
                     <div className="text-center text-gray-600">
                         No products found matching your search
                     </div>
                 ) : (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {filteredProducts.map((product) => (
+                            {products.map((product) => (
                                 <ProductCard key={product._id} product={product} />
                             ))}
                         </div>

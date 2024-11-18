@@ -6,43 +6,45 @@ const router = express.Router();
 // Search route MUST come before the :id route
 router.get('/api/products/search', async (req, res) => {
   try {
-    const { q, page = 1, limit = 12 } = req.query;
-    if (!q) {
-      return res.status(400).json({ message: 'Search query is required' });
-    }
-
-    const searchRegex = new RegExp(q, 'i');
+    const { q, page = 1, limit = 12, categories: selectedCategoryParams } = req.query;
+    const selectedCategories = selectedCategoryParams ? selectedCategoryParams.split(',') : [];
     
-    // Get all products matching search for categories (without pagination)
-    const allMatchingProducts = await Product.find({
+    const searchRegex = new RegExp(q, 'i');
+    const baseQuery = {
       $or: [
         { 'item_name.value': searchRegex },
         { 'brand.value': searchRegex }
       ]
-    }).select('node');
+    };
 
-    // Extract all unique categories
+    // Add category filter if categories are selected
+    if (selectedCategories.length > 0) {
+      baseQuery['node.0.node_name'] = {
+        $regex: new RegExp(selectedCategories.map(cat => 
+          cat.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        ).join('|'), 'i')
+      };
+    }
+
+    // Get all matching products for categories and count
+    const allMatchingProducts = await Product.find(baseQuery).select('node');
+
+    // Extract categories from all matching products
     const categories = new Set();
     allMatchingProducts.forEach(product => {
-      if (product.node && product.node[0] && product.node[0].node_name) {
+      if (product.node?.[0]?.node_name) {
         const nodePath = product.node[0].node_name.split('/');
-        if (nodePath[2]) {
-          categories.add(nodePath[2]);
-        }
+        if (nodePath[2]) categories.add(nodePath[2]);
       }
     });
 
     // Get paginated products
-    const products = await Product.find({
-      $or: [
-        { 'item_name.value': searchRegex },
-        { 'brand.value': searchRegex }
-      ]
-    })
-    .skip((page - 1) * limit)
-    .limit(parseInt(limit))
-    .select('item_name price main_image brand node');
+    const products = await Product.find(baseQuery)
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .select('item_name price main_image brand node');
 
+    // Transform products as before
     const transformedProducts = products.map(product => ({
       _id: product._id,
       name: product.item_name[0]?.value || 'Unknown Product',
