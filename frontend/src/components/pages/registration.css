@@ -4,8 +4,9 @@ body {
   align-items: center;
   min-height: 100vh;
   margin: 0;
-  background-color: hsl(0, 0%, 100%);
+  background-color: #f9f9f9;
   padding: 20px;
+  font-family: 'Arial', sans-serif;
   box-sizing: border-box;
 }
 
@@ -13,83 +14,110 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%; 
-  padding: 20px;
+  width: 100%;
 }
 
 .registration-box {
-  background: linear-gradient(to bottom, #ffffff, #f0f0f0);
-  padding: 15px 20px; 
+  background: #ffffff;
+  padding: 30px 40px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 550px;
+  max-width: 400px;
   text-align: center;
-  box-sizing: border-box;
 }
 
 .registration-box h2 {
-  margin-top: 5px; /* reduced margin-top to bring closer to container */
-  margin-bottom: 15px;
-  font-size: 50px;
-  font-family: Impact, Haettenschweiler, 'Arial Bold', sans-serif;
-  background: linear-gradient(to top, #cf4091, #0d0b71);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 5px;
 }
 
+.registration-box p {
+  font-size: 14px;
+  color: #777777;
+  margin-bottom: 20px;
+}
 
 .registration-box form div {
   margin-bottom: 20px;
+  position: relative;
   text-align: left;
 }
 
 .registration-box label {
   display: block;
   margin-bottom: 5px;
-  font-size: 0.9em;
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-  color: #051734;
+  font-size: 14px;
+  color: #333333;
 }
 
 .registration-box input,
 .registration-box textarea {
   width: 100%;
-  max-width: 500px; /* Set input fields to adapt to box width */
-  padding: 10px;
+  padding: 12px 40px; /* Add space for icons */
   border-radius: 6px;
-  border: 1px solid #3b3a3a;
-  font-size: 1em;
+  border: 1px solid #cccccc;
+  font-size: 14px;
   box-sizing: border-box;
   background-color: #f9f9f9;
-  color: #000000;
+  color: #333333;
+}
+
+.registration-box input:focus,
+.registration-box textarea:focus {
+  border-color: #5062ff;
+  box-shadow: 0 0 5px rgba(80, 98, 255, 0.3);
+  outline: none;
+}
+
+.registration-box .icon {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #5062ff;
 }
 
 .registration-box button {
   width: 100%;
   padding: 12px;
-  background-color: #012344;
+  background-color: #5062ff;
   border: none;
-  border-radius: 6px;
-  font-size: 1em;
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  border-radius: 30px; /* Rounded button */
+  font-size: 16px;
   color: #ffffff;
+  font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .registration-box button:hover {
-  background-color: #cf4091;
+  background-color: #3b4dcd;
 }
 
-/* Responsive adjustments */
+.registration-box .success {
+  color: #28a745;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.registration-box .error {
+  color: #dc3545;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Responsive Design */
 @media (max-width: 600px) {
-  .registration-box h2 {
-      font-size: 36px; /* Smaller font size on smaller screens */
+  .registration-box {
+    padding: 20px;
   }
 
   .registration-box input,
   .registration-box textarea {
-      max-width: 100%; /* Make input fields fill the container width */
+    font-size: 14px;
   }
 }

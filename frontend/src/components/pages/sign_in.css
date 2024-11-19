@@ -1,100 +1,110 @@
-/* sign_in.css */
-
-/* main container Styles */
 .registration-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: 'Arial', sans-serif;
-  }
-  
-  /* Sign-In Box  */
-  .registration-box {
-    background-color: #ffffff;
-    border-radius: 8px; 
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+}
 
-  .registration-box h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333333; 
-  }
+.registration-box {
+  background-color: #ffffff;
+  padding: 40px 30px;
+  border-radius: 8px;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
 
-  .registration-box label {
-    display: block;
-    font-size: 14px;
-    font-weight: 500;
-    color: #555555; 
-    margin-bottom: 8px;
-    text-align: left;
-  }
-  
+.registration-box h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 20px;
+}
 
-  .registration-box input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #cccccc; 
-    border-radius: 4px;
-    font-size: 14px;
-    box-sizing: border-box;
-  }
-  
-  .registration-box input:focus {
-    outline: none;
-    border-color: #5062ff; 
-    box-shadow: 0px 0px 5px rgba(80, 98, 255, 0.3); 
-  }
-  
+.registration-box label {
+  font-size: 14px;
+  color: #333333;
+  margin-bottom: 5px;
+  text-align: left;
+  display: block;
+}
 
-  .registration-box button {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #ffffff;
-    background-color: #5062ff; 
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .registration-box button:hover {
-    background-color: #3b4dcd; 
-  }
-  
-  .registration-box button:active {
-    background-color: #2f3ba6; 
-  }
-  
+.registration-box input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
 
-  .registration-box p {
-    margin: 10px 0;
-    font-size: 14px;
-  }
-  
-  .registration-box p[style*="red"] {
-    color: #ff4d4d; 
-  }
-  
-  .registration-box p[style*="green"] {
-    color: #28a745; 
-  }
-  
-  /* Forgot Password Link */
-  .registration-box p[style*="pointer"] {
-    font-size: 14px;
-    text-decoration: underline;
-  }
-  
-  .registration-box p[style*="pointer"]:hover {
-    color: #3b4dcd;
-  }
-  
-  
+.registration-box input:focus {
+  border-color: #5062ff;
+  box-shadow: 0 0 4px rgba(80, 98, 255, 0.3);
+  outline: none;
+}
+
+.checkbox-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.checkbox-forgot label {
+  font-size: 14px;
+  color: #333333;
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-forgot input {
+  margin-right: 5px;
+}
+
+.forgot-password {
+  font-size: 14px;
+  color: #5062ff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.forgot-password:hover {
+  color: #3b4dcd;
+}
+
+.registration-box button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  color: #ffffff;
+  background-color: #5062ff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.registration-box button:hover {
+  background-color: #3b4dcd;
+}
+
+.registration-box .create-account {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.registration-box .create-account span {
+  color: #5062ff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.registration-box .create-account span:hover {
+  color: #3b4dcd;
+}

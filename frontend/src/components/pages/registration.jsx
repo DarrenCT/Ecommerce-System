@@ -18,7 +18,7 @@ function RegistrationPage() {
     e.preventDefault();
     console.log("Sending data to backend:", { name, email, password, phoneNumber, address });
     try {
-      const response = await axios.post('http://localhost:5000/api/users/register', {
+      const response = await axios.post('http://localhost:5000/register', {
         name,
         email,
         password,

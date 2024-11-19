@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/DevAuthContext'; // Import the authentication context
 import './sign_in.css';
 
 function SignInPage() {
-  const navigate = useNavigate(); // Initialize navigate
+  const { login } = useAuth(); // Access the login function from context
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -12,17 +14,23 @@ function SignInPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Sending sign-in data to backend:", { email, password });
     try {
+      // Send login data to the backend
       const response = await axios.post('http://localhost:5000/sign_in', { email, password });
+
+      // Update authentication state in context
+      login(); // Call the login function to set isAuthenticated and user
+
+      // Clear inputs and state
       setSuccess(response.data.message);
       setError('');
       setEmail('');
       setPassword('');
-      // Redirect to the product page on success
-      navigate('/products'); // Replace '/products' with your product page route
+
+      // Navigate to the home page
+      navigate('/');
     } catch (error) {
-      setError(error.response?.data?.message || "An error occurred during sign-in.");
+      setError(error.response?.data?.message || 'An error occurred during sign-in.');
       setSuccess('');
     }
   };
@@ -30,34 +38,40 @@ function SignInPage() {
   return (
     <div className="registration-container">
       <div className="registration-box">
-        <h2>Sign In</h2>
+        <h2>Sign in</h2>
         <form onSubmit={handleSubmit}>
           <div>
-            <label>Email:</label>
+            <label>Your email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@company.com"
               required
             />
           </div>
           <div>
-            <label>Password:</label>
+            <label>Your password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
               required
             />
           </div>
-          <button type="submit">Sign In</button>
+          <div className="checkbox-forgot">
+            <label>
+              <input type="checkbox" /> Remember me
+            </label>
+            <span className="forgot-password">Lost Password?</span>
+          </div>
+          <button type="submit">Login to your account</button>
         </form>
         {error && <p style={{ color: 'red' }}>{error}</p>}
         {success && <p style={{ color: 'green' }}>{success}</p>}
-
-        {/* Forgot Password Section */}
-        <p style={{ color: '#5062ff', cursor: 'pointer', marginTop: '10px' }}>
-          Forgot Password?
+        <p className="create-account">
+          Not registered? <span>Create account</span>
         </p>
       </div>
     </div>
