@@ -5,7 +5,7 @@ const registrationSchema = new mongoose.Schema({
     userId: {
         type: String,
         default: () => uuidv4(),  
-        unique: truecd 
+        
     },
     email: {
         type: String,

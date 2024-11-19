@@ -1,8 +1,10 @@
 import express from 'express';
 import dotenv from "dotenv";
+import cors from 'cors';
 import { connectDB } from './config/db.js';
 import productRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
+import signInRoutes from './routes/signInRoutes.js';
 import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
@@ -11,6 +13,12 @@ const app = express();
 
 // Middleware to parse JSON request bodies
 app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:5173',  // Replace with your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 
 // Development middleware to simulate authenticated user
 app.use((req, res, next) => {
@@ -31,7 +39,7 @@ app.get('/', (req, res) => {
 
 app.use(productRoutes);
 app.use(cartRoutes);
-
+app.use(signInRoutes);
 
 const PORT = process.env.PORT || 5000;
 
@@ -39,6 +47,3 @@ app.listen(PORT, () => {
     connectDB()
     console.log(`Server running on port ${PORT}`);
 });
-
-
-

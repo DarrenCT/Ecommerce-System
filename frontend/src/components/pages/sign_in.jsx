@@ -1,16 +1,15 @@
-
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import './sign_in.css';
 
 function SignInPage() {
-  // form fields
+  const navigate = useNavigate(); // Initialize navigate
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Sending sign-in data to backend:", { email, password });
@@ -20,6 +19,8 @@ function SignInPage() {
       setError('');
       setEmail('');
       setPassword('');
+      // Redirect to the product page on success
+      navigate('/products'); // Replace '/products' with your product page route
     } catch (error) {
       setError(error.response?.data?.message || "An error occurred during sign-in.");
       setSuccess('');
@@ -55,7 +56,7 @@ function SignInPage() {
         {success && <p style={{ color: 'green' }}>{success}</p>}
 
         {/* Forgot Password Section */}
-        <p onClick={() => setShowForgotPassword(!showForgotPassword)} style={{ color: '#5062ff', cursor: 'pointer', marginTop: '10px' }}>
+        <p style={{ color: '#5062ff', cursor: 'pointer', marginTop: '10px' }}>
           Forgot Password?
         </p>
       </div>
