@@ -5,10 +5,10 @@ const AdminSidebar = () => {
     const location = useLocation();
 
     const menuItems = [
-        { title: 'Dashboard', icon: BarChart3, href: '/admin' },
-        { title: 'Sales History', icon: History, href: '/admin/sales' },
-        { title: 'Inventory', icon: Package, href: '/admin/inventory' },
-        { title: 'Users', icon: Users, href: '/admin/users' },
+        { title: 'Dashboard', icon: BarChart3, href: '/' },
+        { title: 'Sales History', icon: History, href: '/sales' },
+        { title: 'Inventory', icon: Package, href: '/inventory' },
+        { title: 'Users', icon: Users, href: '/users' },
     ];
 
     return (
@@ -21,8 +21,8 @@ const AdminSidebar = () => {
                             key={item.href}
                             to={item.href}
                             className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${location.pathname === item.href
-                                    ? 'bg-amazon-yellow text-black'
-                                    : 'hover:bg-gray-100'
+                                ? 'bg-amazon-yellow text-black'
+                                : 'hover:bg-gray-100'
                                 }`}
                         >
                             <item.icon className="w-5 h-5" />

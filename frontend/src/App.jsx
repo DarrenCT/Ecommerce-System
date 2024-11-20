@@ -6,11 +6,7 @@ import CartPage from './components/pages/CartPage';
 import ProductDetailsPage from './components/pages/ProductDetailsPage';
 import { DevAuthProvider } from './context/DevAuthContext';
 import SearchResults from './components/pages/SearchResults';
-import AdminLayout from './components/layouts/AdminLayout';
-import AdminDashboard from './components/pages/admin/AdminDashboard';
-import SalesHistory from './components/pages/admin/SalesHistory';
-import InventoryManagement from './components/pages/admin/InventoryManagement';
-import UserManagement from './components/pages/admin/UserManagement';
+
 
 // Create a separate component for the layout that uses useLocation
 const AppLayout = () => {
@@ -41,15 +37,6 @@ const App = () => {
     <DevAuthProvider>
       <Router>
         <Routes>
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="sales" element={<SalesHistory />} />
-            <Route path="inventory" element={<InventoryManagement />} />
-            <Route path="users" element={<UserManagement />} />
-          </Route>
-
-          {/* Existing Customer Routes */}
           <Route element={<AppLayout />}>
             <Route path="/" element={<ProductCatalog />} />
             <Route path="/cart" element={<CartPage />} />

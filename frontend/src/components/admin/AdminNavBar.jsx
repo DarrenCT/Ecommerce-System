@@ -7,7 +7,7 @@ const AdminNavBar = () => {
     return (
         <nav className="bg-amazon text-white">
             <div className="max-w-[1500px] mx-auto px-4 py-3 flex justify-between items-center">
-                <Link to="/admin" className="text-xl font-bold">
+                <Link to="/" className="text-xl font-bold">
                     Admin Panel
                 </Link>
                 <div className="flex items-center space-x-4">
