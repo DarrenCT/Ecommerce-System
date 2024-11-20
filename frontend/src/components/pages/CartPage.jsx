@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Trash2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/DevAuthContext';
 
 /**
  * CartPage Component
@@ -12,6 +13,8 @@ const CartPage = () => {
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
 
     /**
      * Retrieves cartId from localStorage or creates a new cart
@@ -92,6 +95,15 @@ const CartPage = () => {
         } catch (error) {
             console.error('Error removing item:', error);
         }
+    };
+
+    const handleCheckout = () => {
+        if (!isAuthenticated) {
+            // Show warning message
+            alert('Please log in to proceed with checkout');
+            return;
+        }
+        navigate('/checkout');
     };
 
     // Initial cart fetch on component mount
@@ -197,7 +209,10 @@ const CartPage = () => {
                                     ${cart.totalAmount.toFixed(2)}
                                 </span>
                             </div>
-                            <button className="w-full bg-amazon-yellow hover:bg-amazon-orange text-black py-2 rounded-md">
+                            <button
+                                onClick={handleCheckout}
+                                className="w-full bg-amazon-yellow hover:bg-amazon-orange text-black py-2 rounded-md"
+                            >
                                 Proceed to Checkout
                             </button>
                         </div>

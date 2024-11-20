@@ -6,6 +6,7 @@ import CartPage from './components/pages/CartPage';
 import ProductDetailsPage from './components/pages/ProductDetailsPage';
 import { DevAuthProvider } from './context/DevAuthContext';
 import SearchResults from './components/pages/SearchResults';
+import CheckoutPage from './components/pages/CheckoutPage';
 
 // Create a separate component for the layout that uses useLocation
 const AppLayout = () => {
@@ -23,6 +24,7 @@ const AppLayout = () => {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />
             <Route path="/search" element={<SearchResults />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
           </Routes>
         </main>
       </div>
