@@ -11,7 +11,9 @@ import CheckoutPage from './components/pages/CheckoutPage';
 // Create a separate component for the layout that uses useLocation
 const AppLayout = () => {
   const location = useLocation();
-  const showGeneralSidebar = location.pathname !== '/' && location.pathname !== '/search';
+  const showGeneralSidebar = location.pathname !== '/' &&
+    location.pathname !== '/search' &&
+    location.pathname !== '/checkout';
 
   return (
     <div className="min-h-screen bg-gray-50">
