@@ -1,14 +1,19 @@
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { useState } from 'react';
+import Toast from './Toast';
 
 //tailwind css product card
 const ProductCard = ({ product }) => {
+    const [showToast, setShowToast] = useState(false);
+
     const addToCart = async () => {
         try {
-            const cartId = localStorage.getItem('cartId');
+            let cartId = localStorage.getItem('cartId');
             if (!cartId) {
                 const response = await axios.post('/api/cart');
-                localStorage.setItem('cartId', response.data.cartId);
+                cartId = response.data.cartId;
+                localStorage.setItem('cartId', cartId);
             }
 
             await axios.post(`/api/cart/${cartId}/items`, {
@@ -16,31 +21,39 @@ const ProductCard = ({ product }) => {
                 quantity: 1
             });
 
-            // You might want to show a success message or update cart count
+            setShowToast(true);
         } catch (error) {
             console.error('Error adding to cart:', error);
         }
     };
 
     return (
-        <div className="bg-white p-4 rounded-lg shadow-md hover:scale-105 transition-transform">
-            <Link to={`/product/${product._id}`}>
-                <img
-                    src={product.image || 'https://via.placeholder.com/400'}
-                    alt={product.name}
-                    className="w-full h-48 object-contain rounded-md mb-4"
+        <>
+            <div className="bg-white p-4 rounded-lg shadow-md hover:scale-105 transition-transform">
+                <Link to={`/product/${product._id}`}>
+                    <img
+                        src={product.image || 'https://via.placeholder.com/400'}
+                        alt={product.name}
+                        className="w-full h-48 object-contain rounded-md mb-4"
+                    />
+                    <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+                    <p className="text-2xl font-bold text-amazon-light">${product.price}</p>
+                </Link>
+                <button
+                    onClick={addToCart}
+                    className="w-full mt-4 bg-amazon-yellow hover:bg-amazon-orange text-black py-2 rounded-md"
+                >
+                    Add to Cart
+                </button>
+            </div>
+            {showToast && (
+                <Toast 
+                    message="Item added to cart successfully!"
+                    onClose={() => setShowToast(false)}
                 />
-                <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                <p className="text-2xl font-bold text-amazon-light">${product.price}</p>
-            </Link>
-            <button
-                onClick={addToCart}
-                className="w-full mt-4 bg-amazon-yellow hover:bg-amazon-orange text-black py-2 rounded-md"
-            >
-                Add to Cart
-            </button>
-        </div>
-    )
-}
+            )}
+        </>
+    );
+};
 
-export default ProductCard
+export default ProductCard;
