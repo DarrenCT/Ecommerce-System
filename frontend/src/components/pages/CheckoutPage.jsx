@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/DevAuthContext';
 import { Link } from 'react-router-dom';
@@ -11,10 +11,13 @@ const CheckoutPage = () => {
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [paymentError, setPaymentError] = useState(null);
+    const [paymentAttempts, setPaymentAttempts] = useState(0);
     const [formData, setFormData] = useState({
         shippingAddress: user?.address || '',
         creditCard: ''
     });
+    const creditCardInputRef = useRef(null);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -41,6 +44,12 @@ const CheckoutPage = () => {
         fetchCart();
     }, [isAuthenticated, navigate]);
 
+    useEffect(() => {
+        if (paymentError && creditCardInputRef.current) {
+            creditCardInputRef.current.focus();
+        }
+    }, [paymentError]);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -60,6 +69,18 @@ const CheckoutPage = () => {
         }
     };
 
+    const processDummyPayment = async (creditCard) => {
+        const response = await axios.post('/api/payments/validate', {
+            creditCard
+        });
+        
+        if (!response.data.success) {
+            throw new Error(response.data.message);
+        }
+        
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!cart || !formData.shippingAddress || !formData.creditCard) {
@@ -69,10 +90,16 @@ const CheckoutPage = () => {
 
         try {
             setLoading(true);
+            setPaymentError(null);
+            setError(null);
+
+            // Process payment first
+            await processDummyPayment(formData.creditCard);
+
             const response = await axios.post('/api/orders', {
                 cartId: cart.cartId,
                 shippingAddress: formData.shippingAddress,
-                billingAddress: formData.shippingAddress, // Using shipping address as billing address
+                billingAddress: formData.shippingAddress,
                 creditCard: formData.creditCard
             });
 
@@ -88,8 +115,14 @@ const CheckoutPage = () => {
                 setError('Failed to create order. Please try again.');
             }
         } catch (error) {
-            console.error('Error creating order:', error);
-            setError(error.response?.data?.message || 'Error creating order. Please try again.');
+            console.error('Error:', error);
+            const errorMessage = error.response?.data?.message || error.message;
+            
+            if (errorMessage.includes('Payment declined')) {
+                setPaymentError(errorMessage);
+            } else {
+                setError(errorMessage || 'Error creating order. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -130,14 +163,21 @@ const CheckoutPage = () => {
                                     required
                                     className="w-full p-2 border rounded-md"
                                     placeholder="Enter credit card number"
+                                    ref={creditCardInputRef}
                                 />
+                                {paymentError && (
+                                    <div className="payment-error-message" style={{ color: 'red', marginTop: '5px', fontSize: '14px' }}>
+                                        {paymentError}
+                                    </div>
+                                )}
                             </div>
 
                             <button
                                 type="submit"
                                 className="w-full bg-amazon-yellow hover:bg-amazon-orange text-black py-2 rounded-md"
+                                disabled={loading}
                             >
-                                Place Order
+                                {loading ? 'Processing...' : 'Place Order'}
                             </button>
                         </form>
                     </div>
@@ -202,4 +242,4 @@ const CheckoutPage = () => {
     );
 };
 
-export default CheckoutPage; 
+export default CheckoutPage;

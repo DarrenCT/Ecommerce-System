@@ -4,6 +4,7 @@ import { connectDB } from './config/db.js';
 import productRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
@@ -33,6 +34,7 @@ app.get('/', (req, res) => {
 app.use(productRoutes);
 app.use(cartRoutes);
 app.use(orderRoutes);
+app.use(paymentRoutes);
 
 const PORT = process.env.PORT || 5000;
 
@@ -40,6 +42,3 @@ app.listen(PORT, () => {
     connectDB()
     console.log(`Server running on port ${PORT}`);
 });
-
-
-
