@@ -49,4 +49,26 @@ router.post('/api/orders', async (req, res) => {
     }
 });
 
+router.get('/api/orders/:orderId', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const order = await Order.findById(orderId)
+            .populate({
+                path: 'items.product',
+                select: 'item_name main_image price'
+            });
+
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        res.json(order);
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'Error fetching order', 
+            error: error.message 
+        });
+    }
+});
+
 export default router; 
