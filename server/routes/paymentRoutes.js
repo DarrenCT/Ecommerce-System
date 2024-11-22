@@ -13,7 +13,7 @@ router.post('/api/payments/validate', (req, res) => {
         paymentAttempts++;
 
         // Reject every third attempt
-        if (paymentAttempts % 3 === 0) {
+        if (paymentAttempts % 2 === 0) {
             return res.status(400).json({
                 success: false,
                 message: 'Payment declined. Please try again with a different card.'
