@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import NavBar from './components/shared/NavBar';
 import Sidebar from './components/shared/Sidebar';
 import ProductCatalog from './components/pages/ProductCatalog';
@@ -8,7 +8,6 @@ import { DevAuthProvider } from './context/DevAuthContext';
 import SearchResults from './components/pages/SearchResults';
 import CheckoutPage from './components/pages/CheckoutPage';
 import OrderConfirmationPage from './components/pages/OrderConfirmationPage';
-
 
 // Create a separate component for the layout that uses useLocation
 const AppLayout = () => {
@@ -25,14 +24,7 @@ const AppLayout = () => {
       <div className="flex">
         {showGeneralSidebar && <Sidebar />}
         <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<ProductCatalog />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/product/:id" element={<ProductDetailsPage />} />
-            <Route path="/search" element={<SearchResults />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
-          </Routes>
+          <Outlet />
         </main>
       </div>
     </div>
@@ -50,6 +42,8 @@ const App = () => {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />
             <Route path="/search" element={<SearchResults />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
           </Route>
         </Routes>
       </Router>
