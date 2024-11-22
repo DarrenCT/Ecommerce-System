@@ -68,18 +68,30 @@ const CheckoutPage = () => {
         }
 
         try {
+            setLoading(true);
             const response = await axios.post('/api/orders', {
                 cartId: cart.cartId,
                 shippingAddress: formData.shippingAddress,
+                billingAddress: formData.shippingAddress, // Using shipping address as billing address
                 creditCard: formData.creditCard
             });
 
-            localStorage.removeItem('cartId');
-            navigate('/order-confirmation', {
-                state: { orderId: response.data.orderId }
-            });
+            if (response.data.orderId) {
+                localStorage.removeItem('cartId');
+                navigate('/order-confirmation', {
+                    state: { 
+                        orderId: response.data.orderId,
+                        message: 'Order placed successfully!'
+                    }
+                });
+            } else {
+                setError('Failed to create order. Please try again.');
+            }
         } catch (error) {
-            setError('Error creating order');
+            console.error('Error creating order:', error);
+            setError(error.response?.data?.message || 'Error creating order. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 

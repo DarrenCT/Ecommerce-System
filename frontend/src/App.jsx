@@ -13,7 +13,8 @@ const AppLayout = () => {
   const location = useLocation();
   const showGeneralSidebar = location.pathname !== '/' &&
     location.pathname !== '/search' &&
-    location.pathname !== '/checkout';
+    location.pathname !== '/checkout' &&
+    location.pathname !== '/cart';
 
   return (
     <div className="min-h-screen bg-gray-50">

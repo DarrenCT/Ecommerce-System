@@ -35,15 +35,10 @@ const orderSchema = new mongoose.Schema({
     billingAddress: {
         type: String,
         required: true
-    },
-    status: {
-        type: String,
-        enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
-        default: 'pending'
     }
 }, {
     timestamps: true
 });
 
 const Order = mongoose.model('Order', orderSchema);
-export default Order; 
+export default Order;
