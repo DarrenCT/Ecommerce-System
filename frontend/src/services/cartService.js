@@ -57,6 +57,11 @@ export const cartService = {
   async associateWithUser(userId, currentCartId) {
     try {
       const response = await axios.post(`/api/cart/user/${userId}`, { currentCartId });
+      // Store the new cart ID in localStorage if it changed
+      const newCartId = response.data.cartId;
+      if (newCartId && newCartId !== currentCartId) {
+        localStorage.setItem('cartId', newCartId);
+      }
       return response.data;
     } catch (error) {
       if (error.response?.status === 400) {

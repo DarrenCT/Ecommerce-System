@@ -300,13 +300,20 @@ router.post('/api/cart/user/:userId', async (req, res) => {
         } else if (currentCart) {
             // If user doesn't have a cart but has a current cart, check if it's already associated with another user
             if (currentCart.userId && currentCart.userId !== userId) {
-                return res.status(400).json({ 
-                    message: 'This cart is already associated with another user' 
+                // Create a new empty cart for the user
+                const cartId = uuidv4();
+                userCart = new Cart({ 
+                    cartId, 
+                    userId,
+                    items: []
                 });
+                await userCart.save();
+            } else {
+                // If cart is not associated with another user, associate it with current user
+                currentCart.userId = userId;
+                userCart = currentCart;
+                await userCart.save();
             }
-            currentCart.userId = userId;
-            userCart = currentCart;
-            await userCart.save();
         } else {
             // Create a new cart for the user
             const cartId = uuidv4();
