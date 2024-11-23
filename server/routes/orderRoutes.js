@@ -83,7 +83,7 @@ router.get('/api/orders/history', async (req, res) => {
         const orders = await Order.find(query)
             .populate({
                 path: 'items.product',
-                select: 'name price' // Only select necessary fields
+                select: 'item_name price' // Select item_name instead of name
             })
             .sort({ createdAt: -1 });
 

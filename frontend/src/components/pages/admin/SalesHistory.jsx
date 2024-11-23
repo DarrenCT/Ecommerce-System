@@ -136,7 +136,7 @@ const SalesHistory = () => {
                                         <ul>
                                             {order.items?.map((item, index) => (
                                                 <li key={index}>
-                                                    {item.product?.name || 'Unknown Product'} - {item.quantity} x ${item.price?.toFixed(2) || '0.00'}
+                                                    {item.product?.item_name?.[0]?.value || 'Unknown Product'} - {item.quantity} x ${item.price?.toFixed(2) || '0.00'}
                                                 </li>
                                             ))}
                                         </ul>
