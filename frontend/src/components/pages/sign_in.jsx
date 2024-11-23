@@ -67,8 +67,15 @@ function SignInPage() {
         {error && <p style={{ color: 'red' }}>{error}</p>}
         {success && <p style={{ color: 'green' }}>{success}</p>}
         <p className="create-account">
-          Not registered? <span>Create account</span>
-        </p>
+  Not registered?{' '}
+  <span
+    style={{ color: 'blue', cursor: 'pointer' }}
+    onClick={() => navigate('/register')}
+  >
+    Create account
+  </span>
+</p>
+
       </div>
     </div>
   );
