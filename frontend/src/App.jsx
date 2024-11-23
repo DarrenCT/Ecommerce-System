@@ -6,21 +6,26 @@ import CartPage from './components/pages/CartPage';
 import ProductDetailsPage from './components/pages/ProductDetailsPage';
 import { DevAuthProvider } from './context/DevAuthContext';
 import SearchResults from './components/pages/SearchResults';
+import RegistrationPage from './components/pages/registration.jsx';
+import SignInPage from './components/pages/sign_in.jsx';
+import MyAccount from './components/pages/myAccount.jsx';
 import CheckoutPage from './components/pages/CheckoutPage';
 import OrderConfirmationPage from './components/pages/OrderConfirmationPage';
 
-// Create a separate component for the layout that uses useLocation
+// General Layout Component
 const AppLayout = () => {
   const location = useLocation();
-  const showGeneralSidebar = location.pathname !== '/' &&
+  const showGeneralSidebar =
+    location.pathname !== '/' &&
     location.pathname !== '/search' &&
     location.pathname !== '/checkout' &&
     location.pathname !== '/cart' &&
-    !location.pathname.startsWith('/order-confirmation');
+    !location.pathname.startsWith('/order-confirmation') &&
+    !['/register', '/sign_in'].includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavBar />
+      {['/register', '/sign_in'].includes(location.pathname) || <NavBar />}
       <div className="flex">
         {showGeneralSidebar && <Sidebar />}
         <main className="flex-1">
@@ -31,14 +36,18 @@ const AppLayout = () => {
   );
 };
 
-// Main App component that provides the Router context
+// Main App Component
 const App = () => {
   return (
     <DevAuthProvider>
       <Router>
         <Routes>
+          {/* Layout for pages with NavBar and Sidebar */}
           <Route element={<AppLayout />}>
             <Route path="/" element={<ProductCatalog />} />
+            <Route path="/register" element={<RegistrationPage />} />
+            <Route path="/sign_in" element={<SignInPage />} />
+            <Route path="/profile" element={<MyAccount />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />
             <Route path="/search" element={<SearchResults />} />

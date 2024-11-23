@@ -1,8 +1,12 @@
 import express from 'express';
 import dotenv from "dotenv";
+import cors from 'cors';
 import { connectDB } from './config/db.js';
 import productRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import signInRoutes from './routes/signInRoutes.js';
+import MyAccountRoutes from './routes/myAccountRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,6 +17,9 @@ const app = express();
 
 // Middleware to parse JSON request bodies
 app.use(express.json());
+app.use(cors()); // This allows all origins
+
+
 
 // Development middleware to simulate authenticated user
 app.use((req, res, next) => {
@@ -33,6 +40,9 @@ app.get('/', (req, res) => {
 
 app.use(productRoutes);
 app.use(cartRoutes);
+app.use(userRoutes);
+app.use(signInRoutes);
+app.use(MyAccountRoutes);
 app.use(orderRoutes);
 app.use(paymentRoutes);
 
@@ -42,3 +52,4 @@ app.listen(PORT, () => {
     connectDB()
     console.log(`Server running on port ${PORT}`);
 });
+
