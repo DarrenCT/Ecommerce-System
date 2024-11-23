@@ -42,7 +42,7 @@ router.get('/api/products/search', async (req, res) => {
     const products = await Product.find(baseQuery)
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .select('item_name price main_image brand node');
+      .select('item_name price main_image brand node quantity');
 
     // Transform products as before
     const transformedProducts = products.map(product => ({
@@ -51,6 +51,7 @@ router.get('/api/products/search', async (req, res) => {
       price: product.price,
       image: product.main_image ? `data:image/jpeg;base64,${product.main_image.toString('base64')}` : null,
       brand: product.brand[0]?.value || 'Unknown Brand',
+      quantity: product.quantity,
       node: product.node || []
     }));
 
@@ -84,7 +85,8 @@ router.get('/api/products', async (req, res) => {
         price: 1,
         main_image: 1,
         brand: 1,
-        node: 1
+        node: 1,
+        quantity: 1
       }}
     ]);
 
@@ -94,6 +96,7 @@ router.get('/api/products', async (req, res) => {
       price: product.price,
       image: product.main_image ? `data:image/jpeg;base64,${product.main_image.toString('base64')}` : null,
       brand: product.brand[0]?.value || 'Unknown Brand',
+      quantity: product.quantity,
       node: product.node || []
     }));
 
