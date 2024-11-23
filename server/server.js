@@ -7,6 +7,8 @@ import cartRoutes from './routes/cartRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import signInRoutes from './routes/signInRoutes.js';
 import MyAccountRoutes from './routes/myAccountRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
@@ -41,6 +43,8 @@ app.use(cartRoutes);
 app.use(userRoutes);
 app.use(signInRoutes);
 app.use(MyAccountRoutes);
+app.use(orderRoutes);
+app.use(paymentRoutes);
 
 const PORT = process.env.PORT || 5000;
 
@@ -48,3 +52,4 @@ app.listen(PORT, () => {
     connectDB()
     console.log(`Server running on port ${PORT}`);
 });
+

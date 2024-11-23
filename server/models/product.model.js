@@ -12,7 +12,11 @@ const productSchema = new mongoose.Schema({
         value: String
     }],
     main_image: { type: Buffer },
-    quantity: { type: Number, required: true, default: 100 }
+    quantity: { type: Number, required: true, default: 100 },
+    node: [{
+        node_id: Number,
+        node_name: String
+    }]
 });
 
 const Product = mongoose.model('Product', productSchema);
