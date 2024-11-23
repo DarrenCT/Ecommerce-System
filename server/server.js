@@ -6,6 +6,7 @@ import productRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import signInRoutes from './routes/signInRoutes.js';
+import MyAccountRoutes from './routes/myAccountRoutes.js';
 import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
@@ -39,6 +40,7 @@ app.use(productRoutes);
 app.use(cartRoutes);
 app.use(userRoutes);
 app.use(signInRoutes);
+app.use(MyAccountRoutes);
 
 const PORT = process.env.PORT || 5000;
 

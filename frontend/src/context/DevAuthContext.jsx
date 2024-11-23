@@ -6,12 +6,9 @@ export const DevAuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUser] = useState(null);
 
-    const login = () => {
-        setUser({
-            id: 'dev-user-1',
-            name: 'Development User',
-            email: 'dev@example.com'
-        });
+    const login = (userData) => {
+        console.log('Setting user in context:', userData); // Debugging
+        setUser(userData); // Ensure userData includes `userId`
         setIsAuthenticated(true);
     };
 
@@ -33,4 +30,4 @@ export const useAuth = () => {
         throw new Error('useAuth must be used within a DevAuthProvider');
     }
     return context;
-}; 
+};

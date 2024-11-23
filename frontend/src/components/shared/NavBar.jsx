@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User } from "lucide-react"
+import { Search, ShoppingCart, User } from "lucide-react";
 import { useAuth } from '../../context/DevAuthContext';
 
 const NavBar = () => {
-    const { user, isAuthenticated, login, logout } = useAuth();
+    const { user, isAuthenticated, logout } = useAuth();
     const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
 
@@ -13,6 +13,20 @@ const NavBar = () => {
         if (searchQuery.trim()) {
             navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
         }
+    };
+
+
+    const handleMyAccount = () => {
+        if (isAuthenticated) {
+            navigate('/profile'); // Navigate to "My Account" if authenticated
+        } else {
+            navigate('/sign_in'); // Navigate to the sign-in page if not authenticated
+        }
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate('/'); // Redirect to the homepage after logout
     };
 
     return (
@@ -51,16 +65,24 @@ const NavBar = () => {
                         <span>Cart</span>
                     </Link>
                     <button
-                        onClick={isAuthenticated ? logout : login}
-                        className="flex items-center space-x-1"
+                        onClick={handleMyAccount}
+                        className="flex items-center space-x-1 hover:text-amazon-yellow"
                     >
                         <User className="h-6 w-6" />
-                        <span>{isAuthenticated ? 'Logout' : 'Login'}</span>
+                        <span>{isAuthenticated ? 'My Account' : 'Login / Sign Up'}</span>
                     </button>
+                    {isAuthenticated && (
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center space-x-1 hover:text-amazon-yellow"
+                        >
+                            <span>Logout</span>
+                        </button>
+                    )}
                 </div>
             </div>
         </nav>
-    )
-}
+    );
+};
 
-export default NavBar 
+export default NavBar;

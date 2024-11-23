@@ -8,6 +8,7 @@ import { DevAuthProvider } from './context/DevAuthContext';
 import SearchResults from './components/pages/SearchResults';
 import RegistrationPage from './components/pages/registration.jsx';
 import SignInPage from './components/pages/sign_in.jsx';
+import MyAccount from './components/pages/myAccount.jsx';
 
 const AppContent = () => {
   const location = useLocation();
@@ -23,6 +24,7 @@ const AppContent = () => {
             <Route path="/" element={<ProductCatalog />} />
             <Route path="/register" element={<RegistrationPage />} />
             <Route path="/sign_in" element={<SignInPage />} />
+            <Route path="/profile" element={<MyAccount/>}/>
             <Route path="/cart" element={<CartPage />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />
             <Route path="/search" element={<SearchResults />} />

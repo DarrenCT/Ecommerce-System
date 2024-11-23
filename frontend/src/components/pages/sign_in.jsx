@@ -15,25 +15,21 @@ function SignInPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Send login data to the backend
-      const response = await axios.post('http://localhost:5000/sign_in', { email, password });
+        // Send login data to the backend
+        const response = await axios.post('http://localhost:5000/sign_in', { email, password });
 
-      // Update authentication state in context
-      login(); // Call the login function to set isAuthenticated and user
+        console.log('Login response:', response.data); // Debugging
+        const userData = response.data.user; // Ensure `userId` is included
+        login(userData); // Pass the full user data to the context
 
-      // Clear inputs and state
-      setSuccess(response.data.message);
-      setError('');
-      setEmail('');
-      setPassword('');
-
-      // Navigate to the home page
-      navigate('/');
+        // Navigate to the home page
+        navigate('/');
     } catch (error) {
-      setError(error.response?.data?.message || 'An error occurred during sign-in.');
-      setSuccess('');
+        console.error('Error during login:', error);
+        setError(error.response?.data?.message || 'An error occurred during sign-in.');
     }
-  };
+};
+
 
   return (
     <div className="registration-container">

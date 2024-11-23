@@ -19,10 +19,14 @@ router.post('/sign_in', async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password.' });
     }
 
-    // Send successful response
+    // Send successful response with `userId`
     res.status(200).json({ 
       message: 'Sign-in successful', 
-      user: { id: user._id, email: user.email, name: user.name } 
+      user: { 
+        userId: user.userId, // Include `userId` from the database
+        email: user.email, 
+        name: user.name 
+      } 
     });
   } catch (error) {
     console.error('Error in sign-in route:', error);
