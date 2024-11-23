@@ -41,13 +41,18 @@ router.get('/api/cart/:cartId', async (req, res) => {
     }
 });
 
-// Create new cart
+// Create a new cart
 router.post('/api/cart', async (req, res) => {
     try {
+        const { userId } = req.body;
         const cartId = uuidv4();
-        const cart = new Cart({ cartId, items: [] });
+        const cart = new Cart({ 
+            cartId, 
+            userId,  
+            items: [] 
+        });
         await cart.save();
-        res.status(201).json({ cartId });
+        res.json({ cartId: cart.cartId });
     } catch (error) {
         res.status(500).json({ message: 'Error creating cart', error: error.message });
     }
@@ -229,6 +234,102 @@ router.delete('/api/cart/:cartId/items/:productId', async (req, res) => {
         res.json(cart);
     } catch (error) {
         res.status(500).json({ message: 'Error removing item from cart', error: error.message });
+    }
+});
+
+// Update cart with userId
+router.put('/api/cart/:cartId/user', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        
+        let cart = await Cart.findOne({ cartId: req.params.cartId });
+        if (!cart) {
+            // If no cart exists, create one with the userId
+            cart = new Cart({ 
+                cartId: req.params.cartId,
+                userId: userId,
+                items: [] 
+            });
+        } else {
+            // Update existing cart with userId
+            cart.userId = userId;
+        }
+        
+        await cart.save();
+        res.json(cart);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating cart with user ID', error: error.message });
+    }
+});
+
+// Find or create user's cart
+router.post('/api/cart/user/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { currentCartId } = req.body;
+
+        // First, try to find an existing cart for this user
+        let userCart = await Cart.findOne({ userId });
+        let currentCart = null;
+
+        if (currentCartId) {
+            currentCart = await Cart.findOne({ cartId: currentCartId });
+        }
+
+        if (userCart) {
+            // If user has an existing cart
+            if (currentCart && currentCart.items.length > 0) {
+                // Merge items from current cart to user's cart
+                for (const item of currentCart.items) {
+                    const existingItem = userCart.items.find(i => 
+                        i.product.toString() === item.product.toString()
+                    );
+                    
+                    if (existingItem) {
+                        existingItem.quantity += item.quantity;
+                    } else {
+                        userCart.items.push(item);
+                    }
+                }
+                await userCart.calculateTotalAmount();
+                await userCart.save();
+                
+                // Delete the temporary cart
+                await Cart.findOneAndDelete({ cartId: currentCartId });
+            }
+        } else if (currentCart) {
+            // If user doesn't have a cart but has a current cart, associate it with the user
+            currentCart.userId = userId;
+            userCart = currentCart;
+            await userCart.save();
+        } else {
+            // Create a new cart for the user
+            const cartId = uuidv4();
+            userCart = new Cart({ 
+                cartId, 
+                userId, 
+                items: [] 
+            });
+            await userCart.save();
+        }
+
+        // Populate and transform the cart data
+        userCart = await userCart.populate('items.product', 'item_name price main_image quantity');
+        userCart = userCart.toObject();
+        userCart.items = userCart.items.map(item => ({
+            ...item,
+            product: {
+                ...item.product,
+                main_image: item.product.main_image 
+                    ? `data:image/jpeg;base64,${item.product.main_image.toString('base64')}`
+                    : null,
+                isOutOfStock: item.product.quantity <= 0
+            }
+        }));
+
+        res.json(userCart);
+    } catch (error) {
+        res.status(500).json({ message: 'Error managing user cart', error: error.message });
     }
 });
 

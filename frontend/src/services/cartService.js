@@ -1,6 +1,11 @@
 import axios from 'axios';
 
 export const cartService = {
+  async createCart(userId = null) {
+    const response = await axios.post('/api/cart', { userId });
+    return response.data;
+  },
+
   async getCart(cartId) {
     const response = await axios.get(`/api/cart/${cartId}`);
     return response.data;
@@ -25,4 +30,4 @@ export const cartService = {
     const response = await axios.delete(`/api/cart/${cartId}/items/${productId}`);
     return response.data;
   }
-}; 
+};

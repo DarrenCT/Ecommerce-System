@@ -2,11 +2,14 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useState } from 'react';
 import Toast from './Toast';
+import { useAuth } from '../../context/DevAuthContext';
+import { cartService } from '../../services/cartService'; 
 
 const ProductCard = ({ product }) => {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [toastDuration, setToastDuration] = useState(3000);
+    const { isAuthenticated, user } = useAuth();
 
     const isOutOfStock = product.quantity <= 0;
 
@@ -21,15 +24,13 @@ const ProductCard = ({ product }) => {
         try {
             let cartId = localStorage.getItem('cartId');
             if (!cartId) {
-                const response = await axios.post('/api/cart');
-                cartId = response.data.cartId;
+                const userId = isAuthenticated ? user.userId : null;
+                const response = await cartService.createCart(userId);
+                cartId = response.cartId;
                 localStorage.setItem('cartId', cartId);
             }
 
-            await axios.post(`/api/cart/${cartId}/items`, {
-                productId: product._id,
-                quantity: 1
-            });
+            await cartService.addToCart(cartId, product._id, 1);
 
             setToastMessage('Item added to cart successfully!');
             setToastDuration(3000);

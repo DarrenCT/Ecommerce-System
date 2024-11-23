@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/DevAuthContext';
+import { cartService } from '../../services/cartService'; // Update to use named import
 
 /**
  * CartPage Component
@@ -14,7 +15,7 @@ const CartPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth(); // Update to include user
 
     /**
      * Retrieves cartId from localStorage or creates a new cart
@@ -34,8 +35,9 @@ const CartPage = () => {
      */
     const createNewCart = async () => {
         try {
-            const response = await axios.post('/api/cart');
-            const cartId = response.data.cartId;
+            const userId = isAuthenticated ? user.userId : null;
+            const response = await cartService.createCart(userId);
+            const cartId = response.cartId;
             localStorage.setItem('cartId', cartId);
             return cartId;
         } catch (error) {

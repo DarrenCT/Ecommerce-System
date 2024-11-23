@@ -18,6 +18,21 @@ function SignInPage() {
       const response = await axios.post('http://localhost:5000/sign_in', { email, password });
       console.log('Login response:', response.data);
       const userData = response.data.user;
+
+      // Handle cart management for the logged-in user
+      const currentCartId = localStorage.getItem('cartId');
+      try {
+        const cartResponse = await axios.post(
+          `http://localhost:5000/api/cart/user/${userData.userId}`,
+          { currentCartId }
+        );
+        
+        // Update localStorage with the user's cart ID
+        localStorage.setItem('cartId', cartResponse.data.cartId);
+      } catch (error) {
+        console.error('Error managing cart during login:', error);
+      }
+
       login(userData);
       navigate('/');
     } catch (error) {
