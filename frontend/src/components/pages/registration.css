@@ -1,4 +1,4 @@
-body {
+/* body {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -56,7 +56,7 @@ body {
 .registration-box input,
 .registration-box textarea {
   width: 100%;
-  padding: 12px 40px; /* Add space for icons */
+  padding: 12px 40px; 
   border-radius: 6px;
   border: 1px solid #cccccc;
   font-size: 14px;
@@ -86,7 +86,7 @@ body {
   padding: 12px;
   background-color: #5062ff;
   border: none;
-  border-radius: 30px; /* Rounded button */
+  border-radius: 30px; 
   font-size: 16px;
   color: #ffffff;
   font-weight: bold;
@@ -110,7 +110,7 @@ body {
   margin-top: 10px;
 }
 
-/* Responsive Design */
+
 @media (max-width: 600px) {
   .registration-box {
     padding: 20px;
@@ -120,4 +120,4 @@ body {
   .registration-box textarea {
     font-size: 14px;
   }
-}
+} */
