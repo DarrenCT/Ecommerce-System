@@ -3,11 +3,21 @@ import axios from 'axios';
 import { useState } from 'react';
 import Toast from './Toast';
 
-//tailwind css product card
 const ProductCard = ({ product }) => {
     const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastDuration, setToastDuration] = useState(3000);
+
+    const isOutOfStock = product.quantity <= 0;
 
     const addToCart = async () => {
+        if (isOutOfStock) {
+            setToastMessage('Sorry, this item is out of stock');
+            setToastDuration(2000);
+            setShowToast(true);
+            return;
+        }
+
         try {
             let cartId = localStorage.getItem('cartId');
             if (!cartId) {
@@ -21,9 +31,14 @@ const ProductCard = ({ product }) => {
                 quantity: 1
             });
 
+            setToastMessage('Item added to cart successfully!');
+            setToastDuration(3000);
             setShowToast(true);
         } catch (error) {
             console.error('Error adding to cart:', error);
+            setToastMessage('Error adding item to cart');
+            setToastDuration(3000);
+            setShowToast(true);
         }
     };
 
@@ -38,17 +53,26 @@ const ProductCard = ({ product }) => {
                     />
                     <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
                     <p className="text-2xl font-bold text-amazon-light">${product.price}</p>
+                    {isOutOfStock && (
+                        <p className="text-red-500 font-semibold mt-2">Out of Stock</p>
+                    )}
                 </Link>
                 <button
                     onClick={addToCart}
-                    className="w-full mt-4 bg-amazon-yellow hover:bg-amazon-orange text-black py-2 rounded-md"
+                    disabled={isOutOfStock}
+                    className={`w-full mt-4 py-2 rounded-md ${
+                        isOutOfStock
+                            ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                            : 'bg-amazon-yellow hover:bg-amazon-orange text-black'
+                    }`}
                 >
-                    Add to Cart
+                    {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
                 </button>
             </div>
             {showToast && (
                 <Toast 
-                    message="Item added to cart successfully!"
+                    message={toastMessage}
+                    duration={toastDuration}
                     onClose={() => setShowToast(false)}
                 />
             )}

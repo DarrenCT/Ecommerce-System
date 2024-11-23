@@ -22,7 +22,7 @@ router.get('/api/cart/:cartId', async (req, res) => {
         await cart.calculateTotalAmount();
         await cart.save();
         
-        // Transform the cart items to include properly formatted images
+        // Transform the cart items to include properly formatted images and check stock
         cart = cart.toObject(); // Convert to plain object for manipulation
         cart.items = cart.items.map(item => ({
             ...item,
@@ -30,7 +30,8 @@ router.get('/api/cart/:cartId', async (req, res) => {
                 ...item.product,
                 main_image: item.product.main_image 
                     ? `data:image/jpeg;base64,${item.product.main_image.toString('base64')}`
-                    : null
+                    : null,
+                isOutOfStock: item.product.quantity <= 0
             }
         }));
         
@@ -61,8 +62,18 @@ router.post('/api/cart/:cartId/items', async (req, res) => {
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
+
+        // Check if product is out of stock
+        if (product.quantity <= 0) {
+            return res.status(400).json({ message: 'Product is out of stock' });
+        }
+
+        // Check if there's enough inventory
         if (product.quantity < quantity) {
-            return res.status(400).json({ message: 'Not enough inventory' });
+            return res.status(400).json({ 
+                message: 'Not enough inventory', 
+                availableQuantity: product.quantity 
+            });
         }
 
         let cart = await Cart.findOne({ cartId: req.params.cartId });
@@ -74,15 +85,38 @@ router.post('/api/cart/:cartId/items', async (req, res) => {
             item.product.toString() === productId
         );
 
+        // Check total quantity including existing cart items
+        const totalQuantity = (existingItem ? existingItem.quantity : 0) + quantity;
+        if (product.quantity < totalQuantity) {
+            return res.status(400).json({ 
+                message: 'Not enough inventory for total quantity', 
+                availableQuantity: product.quantity 
+            });
+        }
+
         if (existingItem) {
-            existingItem.quantity += quantity;
+            existingItem.quantity = totalQuantity;
         } else {
             cart.items.push({ product: productId, quantity });
         }
 
         await cart.calculateTotalAmount();
         await cart.save();
+        
         cart = await cart.populate('items.product', 'item_name price main_image quantity');
+        
+        // Transform response to include stock information
+        cart = cart.toObject();
+        cart.items = cart.items.map(item => ({
+            ...item,
+            product: {
+                ...item.product,
+                main_image: item.product.main_image 
+                    ? `data:image/jpeg;base64,${item.product.main_image.toString('base64')}`
+                    : null,
+                isOutOfStock: item.product.quantity <= 0
+            }
+        }));
         
         res.json(cart);
     } catch (error) {
@@ -99,37 +133,60 @@ router.put('/api/cart/:cartId/items/:productId', async (req, res) => {
         if (quantity < 0) {
             return res.status(400).json({ message: 'Invalid quantity' });
         }
-        
-        //will use userId in the future
-        //let cart = await Cart.findOne({ userId: req.params.userId });
+
+        const product = await Product.findById(req.params.productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        // Check if product is out of stock
+        if (quantity > 0 && product.quantity <= 0) {
+            return res.status(400).json({ message: 'Product is out of stock' });
+        }
+
+        // Check if there's enough inventory
+        if (quantity > product.quantity) {
+            return res.status(400).json({ 
+                message: 'Not enough inventory', 
+                availableQuantity: product.quantity 
+            });
+        }
+
         let cart = await Cart.findOne({ cartId: req.params.cartId });
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
         }
 
-        const itemIndex = cart.items.findIndex(item => 
-            item.product.toString() === req.params.productId
-        );
-
-        if (itemIndex === -1) {
-            return res.status(404).json({ message: 'Item not found in cart' });
-        }
-
         if (quantity === 0) {
-            cart.items.splice(itemIndex, 1);
+            cart.items = cart.items.filter(item => 
+                item.product.toString() !== req.params.productId
+            );
         } else {
-            // Validate inventory
-            const product = await Product.findById(req.params.productId);
-            if (product.quantity < quantity) {
-                return res.status(400).json({ message: 'Not enough inventory' });
+            const cartItem = cart.items.find(item => 
+                item.product.toString() === req.params.productId
+            );
+            if (cartItem) {
+                cartItem.quantity = quantity;
             }
-            cart.items[itemIndex].quantity = quantity;
         }
 
         await cart.calculateTotalAmount();
         await cart.save();
-
+        
         cart = await cart.populate('items.product', 'item_name price main_image quantity');
+        
+        // Transform response to include stock information
+        cart = cart.toObject();
+        cart.items = cart.items.map(item => ({
+            ...item,
+            product: {
+                ...item.product,
+                main_image: item.product.main_image 
+                    ? `data:image/jpeg;base64,${item.product.main_image.toString('base64')}`
+                    : null,
+                isOutOfStock: item.product.quantity <= 0
+            }
+        }));
         
         res.json(cart);
     } catch (error) {
@@ -155,6 +212,19 @@ router.delete('/api/cart/:cartId/items/:productId', async (req, res) => {
         await cart.save();
 
         cart = await cart.populate('items.product', 'item_name price main_image quantity');
+        
+        // Transform response to include stock information
+        cart = cart.toObject();
+        cart.items = cart.items.map(item => ({
+            ...item,
+            product: {
+                ...item.product,
+                main_image: item.product.main_image 
+                    ? `data:image/jpeg;base64,${item.product.main_image.toString('base64')}`
+                    : null,
+                isOutOfStock: item.product.quantity <= 0
+            }
+        }));
         
         res.json(cart);
     } catch (error) {
