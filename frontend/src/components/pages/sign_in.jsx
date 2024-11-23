@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/DevAuthContext';
 
@@ -9,35 +8,25 @@ function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      const response = await axios.post('http://localhost:5000/sign_in', { email, password });
-      console.log('Login response:', response.data);
-      const userData = response.data.user;
-
-      // Handle cart management for the logged-in user
-      const currentCartId = localStorage.getItem('cartId');
-      try {
-        const cartResponse = await axios.post(
-          `http://localhost:5000/api/cart/user/${userData.userId}`,
-          { currentCartId }
-        );
-        
-        // Update localStorage with the user's cart ID
-        localStorage.setItem('cartId', cartResponse.data.cartId);
-      } catch (error) {
-        console.error('Error managing cart during login:', error);
+      const result = await login({ email, password, rememberMe });
+      if (result.success) {
+        navigate('/');
+      } else {
+        setError(result.error);
       }
-
-      login(userData);
-      navigate('/');
     } catch (error) {
-      console.error('Error during login:', error);
-      setError(error.response?.data?.message || 'An error occurred during sign-in.');
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,6 +35,11 @@ function SignInPage() {
       <div className="max-w-4xl w-full space-y-12 bg-white p-16 rounded-xl shadow-md">
         <div>
           <h2 className="text-center text-5xl font-bold text-gray-900 mb-4">Sign in</h2>
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+              <p className="text-red-700">{error}</p>
+            </div>
+          )}
         </div>
         <form className="mt-12 space-y-10" onSubmit={handleSubmit}>
           <div className="space-y-8">
@@ -99,17 +93,16 @@ function SignInPage() {
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              className="w-full flex justify-center py-4 px-6 border border-transparent rounded-lg shadow-md text-xl font-medium text-black bg-amazon-yellow hover:bg-amazon-orange focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amazon-light"
-            >
-              Sign in
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full flex justify-center py-4 px-6 border border-transparent rounded-lg shadow-sm text-xl font-medium text-white bg-amazon-light hover:bg-amazon-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amazon-light ${
+              loading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            {loading ? 'Signing in...' : 'Sign in'}
+          </button>
         </form>
-        {error && <p className="mt-4 text-center text-lg text-red-600">{error}</p>}
-        {success && <p className="mt-4 text-center text-lg text-green-600">{success}</p>}
         <p className="mt-4 text-center text-lg text-gray-600">
           Not registered?{' '}
           <span

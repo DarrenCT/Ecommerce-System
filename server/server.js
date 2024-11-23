@@ -9,6 +9,7 @@ import signInRoutes from './routes/signInRoutes.js';
 import MyAccountRoutes from './routes/myAccountRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
@@ -19,24 +20,13 @@ const app = express();
 app.use(express.json());
 app.use(cors()); // This allows all origins
 
-
-
-// Development middleware to simulate authenticated user
-app.use((req, res, next) => {
-  // Simulate a logged-in user for development
-  req.user = {
-    id: 'dev-user-' + uuidv4(),
-    name: 'Development User',
-    email: 'dev@example.com',
-    isAdmin: true
-  };
-  next();
-});
-
 //test route to check if server is running
 app.get('/', (req, res) => {
     res.send('server is ready');
 });
+
+// Use authentication routes
+app.use('/api/auth', authRoutes);
 
 app.use(productRoutes);
 app.use(cartRoutes);
@@ -52,4 +42,3 @@ app.listen(PORT, () => {
     connectDB()
     console.log(`Server running on port ${PORT}`);
 });
-
