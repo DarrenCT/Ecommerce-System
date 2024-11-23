@@ -298,7 +298,12 @@ router.post('/api/cart/user/:userId', async (req, res) => {
                 await Cart.findOneAndDelete({ cartId: currentCartId });
             }
         } else if (currentCart) {
-            // If user doesn't have a cart but has a current cart, associate it with the user
+            // If user doesn't have a cart but has a current cart, check if it's already associated with another user
+            if (currentCart.userId && currentCart.userId !== userId) {
+                return res.status(400).json({ 
+                    message: 'This cart is already associated with another user' 
+                });
+            }
             currentCart.userId = userId;
             userCart = currentCart;
             await userCart.save();
