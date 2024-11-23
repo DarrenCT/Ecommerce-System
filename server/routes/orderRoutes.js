@@ -46,9 +46,64 @@ router.post('/api/orders', async (req, res) => {
             orderId: order._id 
         });
     } catch (error) {
-        console.error('Order creation error:', error);
+        console.error('Error creating order in /api/orders:', error);
         res.status(500).json({ 
             message: 'Error creating order', 
+            error: error.message 
+        });
+    }
+});
+
+router.get('/api/orders/history', async (req, res) => {
+    try {
+        const { customerId, productId, startDate, endDate } = req.query;
+        
+        // Build the query
+        const query = {};
+        
+        if (customerId) {
+            query.userId = customerId;
+        }
+        
+        if (productId) {
+            query['items.product'] = productId;
+        }
+        
+        if (startDate || endDate) {
+            query.createdAt = {};
+            if (startDate) {
+                query.createdAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                query.createdAt.$lte = new Date(endDate);
+            }
+        }
+
+        // Get orders with populated product details
+        const orders = await Order.find(query)
+            .populate({
+                path: 'items.product',
+                select: 'name price' // Only select necessary fields
+            })
+            .sort({ createdAt: -1 });
+
+        // Convert timestamps to Toronto time
+        const torontoOrders = orders.map(order => {
+            const orderObj = order.toObject();
+            const torontoTime = new Date(order.createdAt).toLocaleString("en-US", {
+                timeZone: "America/Toronto"
+            });
+            return {
+                ...orderObj,
+                createdAt: torontoTime
+            };
+        });
+
+        res.json(torontoOrders);
+    } catch (error) {
+        console.error('Error in /api/orders/history:', error);
+        res.status(500).json({ 
+            message: 'Error fetching sales history', 
             error: error.message 
         });
     }
@@ -76,4 +131,4 @@ router.get('/api/orders/:orderId', async (req, res) => {
     }
 });
 
-export default router; 
+export default router;
