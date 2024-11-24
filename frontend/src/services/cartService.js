@@ -41,7 +41,7 @@ export const cartService = {
       if (error.response?.status === 404) {
         return null;
       }
-      throw new Error('Failed to fetch user cart');
+      throw new Error('Failed to get user cart');
     }
   },
 
@@ -149,12 +149,53 @@ export const cartService = {
     }
   },
 
-  async associateWithUser(userId, cartId) {
+  async mergeAndDeleteCart(targetCartId, sourceCartId) {
     try {
-      const response = await axios.post(`/api/cart/user/${userId}`, {
-        currentCartId: cartId
+      const response = await axios.post(`/api/cart/${targetCartId}/merge`, {
+        sourceCartId
       });
       return response.data;
+    } catch (error) {
+      throw new Error('Failed to merge carts');
+    }
+  },
+
+  async deleteCart(cartId) {
+    try {
+      await axios.delete(`/api/cart/${cartId}`);
+    } catch (error) {
+      throw new Error('Failed to delete cart');
+    }
+  },
+
+  async associateWithUser(userId, cartId) {
+    try {
+      // First check if user already has a cart
+      const existingUserCart = await this.getUserCart(userId);
+      const guestCart = await this.getCart(cartId);
+
+      if (existingUserCart) {
+        // If user has a cart and there's a guest cart with items
+        if (guestCart && !guestCart.userId && guestCart.items.length > 0) {
+          // Merge guest cart into user cart
+          const mergedCart = await this.mergeAndDeleteCart(existingUserCart.cartId, guestCart.cartId);
+          localStorage.setItem('cartId', existingUserCart.cartId);
+          return mergedCart;
+        }
+        // If no guest cart or empty guest cart, just use existing user cart
+        if (guestCart && !guestCart.userId) {
+          await this.deleteCart(guestCart.cartId);
+        }
+        localStorage.setItem('cartId', existingUserCart.cartId);
+        return existingUserCart;
+      }
+
+      // If no user cart exists, convert guest cart
+      if (!guestCart.userId) {
+        const response = await axios.put(`/api/cart/${cartId}/user`, { userId });
+        return response.data;
+      }
+      return guestCart;
     } catch (error) {
       throw new Error('Failed to associate cart with user');
     }

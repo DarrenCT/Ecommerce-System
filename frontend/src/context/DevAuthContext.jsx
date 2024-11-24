@@ -40,19 +40,20 @@ export const DevAuthProvider = ({ children }) => {
             // Set token in axios headers
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             
-            localStorage.setItem('auth', JSON.stringify({ token, user }));
-            setUser(user);
-            setIsAuthenticated(true);
-            
             // Associate cart with user if it exists
             const cartId = localStorage.getItem('cartId');
             if (cartId) {
                 try {
+                    const { cartService } = await import('../services/cartService');
                     await cartService.associateWithUser(user.userId, cartId);
                 } catch (error) {
                     console.error('Error associating cart with user:', error);
                 }
             }
+            
+            localStorage.setItem('auth', JSON.stringify({ token, user }));
+            setUser(user);
+            setIsAuthenticated(true);
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Login failed');
         }

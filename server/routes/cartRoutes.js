@@ -373,13 +373,13 @@ router.get('/api/cart/user/:userId', async (req, res) => {
             .populate('items.product', 'item_name price main_image quantity');
         
         if (!cart) {
-            return res.status(404).json({ message: 'Cart not found' });
+            return res.status(404).json({ message: 'No cart found for user' });
         }
 
         await cart.calculateTotalAmount();
         await cart.save();
         
-        // Transform cart items
+        // Transform the cart items to include properly formatted images and check stock
         const transformedCart = cart.toObject();
         transformedCart.items = transformedCart.items.map(item => ({
             ...item,
@@ -415,6 +415,74 @@ router.put('/api/cart/:cartId/user', async (req, res) => {
         res.json(cart);
     } catch (error) {
         res.status(500).json({ message: 'Error updating cart user', error: error.message });
+    }
+});
+
+// Merge cart and delete source cart
+router.post('/api/cart/:cartId/merge', async (req, res) => {
+    try {
+        const targetCart = await Cart.findOne({ cartId: req.params.cartId })
+            .populate('items.product', 'item_name price main_image quantity');
+        const sourceCart = await Cart.findOne({ cartId: req.body.sourceCartId })
+            .populate('items.product', 'item_name price main_image quantity');
+
+        if (!targetCart || !sourceCart) {
+            return res.status(404).json({ message: 'One or both carts not found' });
+        }
+
+        // Merge items from source cart into target cart
+        for (const sourceItem of sourceCart.items) {
+            const existingItemIndex = targetCart.items.findIndex(
+                item => item.product._id.toString() === sourceItem.product._id.toString()
+            );
+
+            if (existingItemIndex > -1) {
+                // If item exists, add quantities
+                targetCart.items[existingItemIndex].quantity += sourceItem.quantity;
+            } else {
+                // If item doesn't exist, add it
+                targetCart.items.push({
+                    product: sourceItem.product._id,
+                    quantity: sourceItem.quantity
+                });
+            }
+        }
+
+        await targetCart.calculateTotalAmount();
+        await targetCart.save();
+
+        // Delete the source cart
+        await Cart.findOneAndDelete({ cartId: req.body.sourceCartId });
+
+        // Transform the cart items for response
+        const transformedCart = targetCart.toObject();
+        transformedCart.items = transformedCart.items.map(item => ({
+            ...item,
+            product: {
+                ...item.product,
+                main_image: item.product.main_image 
+                    ? `data:image/jpeg;base64,${item.product.main_image.toString('base64')}`
+                    : null,
+                isOutOfStock: item.product.quantity <= 0
+            }
+        }));
+
+        res.json(transformedCart);
+    } catch (error) {
+        res.status(500).json({ message: 'Error merging carts', error: error.message });
+    }
+});
+
+// Delete cart
+router.delete('/api/cart/:cartId', async (req, res) => {
+    try {
+        const cart = await Cart.findOneAndDelete({ cartId: req.params.cartId });
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found' });
+        }
+        res.json({ message: 'Cart deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting cart', error: error.message });
     }
 });
 
