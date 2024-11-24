@@ -17,14 +17,10 @@ function SignInPage() {
     setLoading(true);
 
     try {
-      const result = await login({ email, password, rememberMe });
-      if (result.success) {
-        navigate('/');
-      } else {
-        setError(result.error);
-      }
+      await login(email, password);
+      navigate('/');
     } catch (error) {
-      setError('An unexpected error occurred. Please try again.');
+      setError(error.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -53,7 +49,8 @@ function SignInPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="name@company.com"
+                placeholder="Email"
+                autoComplete="email"
                 className="mt-2 block w-full px-6 py-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-amazon-light focus:border-amazon-light text-xl"
               />
             </div>
@@ -68,6 +65,7 @@ function SignInPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
+                autoComplete="current-password"
                 className="mt-2 block w-full px-6 py-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-amazon-light focus:border-amazon-light text-xl"
               />
             </div>

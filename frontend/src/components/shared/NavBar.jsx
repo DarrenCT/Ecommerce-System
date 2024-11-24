@@ -19,13 +19,8 @@ const NavBar = () => {
     const handleCartClick = async (e) => {
         e.preventDefault();
         try {
-            let cartId = localStorage.getItem('cartId');
-            if (!cartId) {
-                const userId = isAuthenticated ? user.userId : null;
-                const response = await cartService.createCart(userId);
-                cartId = response.cartId;
-                localStorage.setItem('cartId', cartId);
-            }
+            const userId = isAuthenticated ? user.userId : null;
+            const cart = await cartService.getOrCreateCart(userId);
             navigate('/cart');
         } catch (error) {
             console.error('Error accessing cart:', error);

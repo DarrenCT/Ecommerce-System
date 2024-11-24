@@ -345,4 +345,56 @@ router.post('/api/cart/user/:userId', async (req, res) => {
     }
 });
 
+// Get user's cart
+router.get('/api/cart/user/:userId', async (req, res) => {
+    try {
+        const cart = await Cart.findOne({ userId: req.params.userId })
+            .populate('items.product', 'item_name price main_image quantity');
+        
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found' });
+        }
+
+        await cart.calculateTotalAmount();
+        await cart.save();
+        
+        // Transform cart items
+        const transformedCart = cart.toObject();
+        transformedCart.items = transformedCart.items.map(item => ({
+            ...item,
+            product: {
+                ...item.product,
+                main_image: item.product.main_image 
+                    ? `data:image/jpeg;base64,${item.product.main_image.toString('base64')}`
+                    : null,
+                isOutOfStock: item.product.quantity <= 0
+            }
+        }));
+        
+        res.json(transformedCart);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user cart', error: error.message });
+    }
+});
+
+// Update cart's user
+router.put('/api/cart/:cartId/user', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const cart = await Cart.findOne({ cartId: req.params.cartId });
+        
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found' });
+        }
+
+        // Update the cart's userId
+        cart.userId = userId;
+        await cart.save();
+        
+        res.json(cart);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating cart user', error: error.message });
+    }
+});
+
 export default router;

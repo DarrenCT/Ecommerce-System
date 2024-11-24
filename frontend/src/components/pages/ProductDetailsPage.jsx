@@ -50,15 +50,10 @@ const ProductDetailsPage = () => {
         }
 
         try {
-            let cartId = localStorage.getItem('cartId');
-            if (!cartId) {
-                const userId = isAuthenticated ? user.userId : null;
-                const response = await cartService.createCart(userId);
-                cartId = response.cartId;
-                localStorage.setItem('cartId', cartId);
-            }
-
-            await cartService.addToCart(cartId, product._id, 1);
+            const userId = isAuthenticated ? user.userId : null;
+            const cart = await cartService.getOrCreateCart(userId);
+            await cartService.addToCart(cart.cartId, product._id, 1);
+            
             setToastMessage('Item added to cart successfully!');
             setShowToast(true);
         } catch (error) {

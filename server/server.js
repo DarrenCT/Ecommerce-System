@@ -25,13 +25,12 @@ app.get('/', (req, res) => {
     res.send('server is ready');
 });
 
-// Use authentication routes
+// Use routes
+app.use(signInRoutes); 
 app.use('/api/auth', authRoutes);
-
 app.use(productRoutes);
 app.use(cartRoutes);
 app.use(userRoutes);
-app.use(signInRoutes);
 app.use(MyAccountRoutes);
 app.use(orderRoutes);
 app.use(paymentRoutes);

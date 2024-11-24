@@ -13,15 +13,16 @@ export const DevAuthProvider = ({ children }) => {
     }, []);
 
     const checkAuthStatus = async () => {
-        const token = localStorage.getItem('authToken');
-        if (token) {
+        const auth = localStorage.getItem('auth');
+        if (auth) {
             try {
+                const { token, user } = JSON.parse(auth);
                 // Set token in axios headers
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                 
                 // Verify token with backend
-                const response = await axios.get('http://localhost:5000/api/auth/verify');
-                setUser(response.data.user);
+                const response = await axios.get('/api/auth/verify');
+                setUser(user);
                 setIsAuthenticated(true);
             } catch (error) {
                 console.error('Token verification failed:', error);
@@ -31,41 +32,46 @@ export const DevAuthProvider = ({ children }) => {
         setLoading(false);
     };
 
-    const login = async (credentials) => {
+    const login = async (email, password) => {
         try {
-            const response = await axios.post('http://localhost:5000/sign_in', credentials);
+            const response = await axios.post('/api/sign_in', { email, password });
             const { token, user } = response.data;
             
-            localStorage.setItem('authToken', token);
+            // Set token in axios headers
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             
+            localStorage.setItem('auth', JSON.stringify({ token, user }));
             setUser(user);
             setIsAuthenticated(true);
             
-            return { success: true };
+            // Associate cart with user if it exists
+            const cartId = localStorage.getItem('cartId');
+            if (cartId) {
+                try {
+                    await cartService.associateWithUser(user.userId, cartId);
+                } catch (error) {
+                    console.error('Error associating cart with user:', error);
+                }
+            }
         } catch (error) {
-            console.error('Login error:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'An error occurred during login'
-            };
+            throw new Error(error.response?.data?.message || 'Login failed');
         }
     };
 
     const signup = async (userData) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/signup', userData);
+            const response = await axios.post('/api/signup', userData);
             const { token, user } = response.data;
             
-            localStorage.setItem('authToken', token);
+            // Set token in axios headers
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             
+            localStorage.setItem('auth', JSON.stringify({ token, user }));
             setUser(user);
             setIsAuthenticated(true);
             
             return { success: true };
         } catch (error) {
-            console.error('Signup error:', error);
             return {
                 success: false,
                 error: error.response?.data?.message || 'An error occurred during signup'
@@ -74,7 +80,7 @@ export const DevAuthProvider = ({ children }) => {
     };
 
     const logout = () => {
-        localStorage.removeItem('authToken');
+        localStorage.removeItem('auth');
         delete axios.defaults.headers.common['Authorization'];
         setUser(null);
         setIsAuthenticated(false);
@@ -82,8 +88,9 @@ export const DevAuthProvider = ({ children }) => {
 
     const updateProfile = async (updates) => {
         try {
-            const response = await axios.patch('http://localhost:5000/api/auth/profile', updates, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+            const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+            const response = await axios.patch('/api/auth/profile', updates, {
+                headers: { Authorization: `Bearer ${auth.token}` }
             });
             setUser(response.data.user);
             return { success: true };
@@ -91,7 +98,7 @@ export const DevAuthProvider = ({ children }) => {
             console.error('Profile update error:', error);
             return {
                 success: false,
-                error: error.response?.data?.message || 'An error occurred while updating profile'
+                error: error.response?.data?.message || 'Failed to update profile'
             };
         }
     };
