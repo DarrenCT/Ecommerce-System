@@ -98,6 +98,7 @@ const CheckoutPage = () => {
 
             const response = await axios.post('/api/orders', {
                 cartId: cart.cartId,
+                userId: user.userId,
                 shippingAddress: formData.shippingAddress,
                 billingAddress: formData.shippingAddress,
                 creditCard: formData.creditCard
