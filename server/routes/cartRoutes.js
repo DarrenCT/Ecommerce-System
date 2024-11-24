@@ -18,12 +18,17 @@ router.get('/api/cart/:cartId', async (req, res) => {
             });
             await cart.save();
         }
+
+        // If cart has a userId, only allow access if it matches the request
+        if (cart.userId && req.query.userId !== cart.userId) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
         
         await cart.calculateTotalAmount();
         await cart.save();
         
         // Transform the cart items to include properly formatted images and check stock
-        cart = cart.toObject(); // Convert to plain object for manipulation
+        cart = cart.toObject();
         cart.items = cart.items.map(item => ({
             ...item,
             product: {
@@ -45,14 +50,19 @@ router.get('/api/cart/:cartId', async (req, res) => {
 router.post('/api/cart', async (req, res) => {
     try {
         const { userId } = req.body;
+        
+        // If userId is provided, check if user already has a cart
+        if (userId) {
+            const existingCart = await Cart.findOne({ userId });
+            if (existingCart) {
+                return res.json(existingCart);
+            }
+        }
+        
         const cartId = uuidv4();
-        const cart = new Cart({ 
-            cartId, 
-            userId,  
-            items: [] 
-        });
+        const cart = new Cart({ cartId, userId });
         await cart.save();
-        res.json({ cartId: cart.cartId });
+        res.json(cart);
     } catch (error) {
         res.status(500).json({ message: 'Error creating cart', error: error.message });
     }
@@ -61,6 +71,16 @@ router.post('/api/cart', async (req, res) => {
 // Add item to cart
 router.post('/api/cart/:cartId/items', async (req, res) => {
     try {
+        const cart = await Cart.findOne({ cartId: req.params.cartId });
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found' });
+        }
+
+        // If cart has a userId, only allow access if it matches the request
+        if (cart.userId && req.query.userId !== cart.userId) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
         const { productId, quantity } = req.body;
         
         const product = await Product.findById(productId);
@@ -79,11 +99,6 @@ router.post('/api/cart/:cartId/items', async (req, res) => {
                 message: 'Not enough inventory', 
                 availableQuantity: product.quantity 
             });
-        }
-
-        let cart = await Cart.findOne({ cartId: req.params.cartId });
-        if (!cart) {
-            return res.status(404).json({ message: 'Cart not found' });
         }
 
         const existingItem = cart.items.find(item => 
@@ -162,6 +177,11 @@ router.put('/api/cart/:cartId/items/:productId', async (req, res) => {
             return res.status(404).json({ message: 'Cart not found' });
         }
 
+        // If cart has a userId, only allow access if it matches the request
+        if (cart.userId && req.query.userId !== cart.userId) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
         if (quantity === 0) {
             cart.items = cart.items.filter(item => 
                 item.product.toString() !== req.params.productId
@@ -202,11 +222,14 @@ router.put('/api/cart/:cartId/items/:productId', async (req, res) => {
 // Remove item from cart
 router.delete('/api/cart/:cartId/items/:productId', async (req, res) => {
     try {
-        //will use userId in the future
-        //let cart = await Cart.findOne({ userId: req.params.userId });
         let cart = await Cart.findOne({ cartId: req.params.cartId });
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
+        }
+
+        // If cart has a userId, only allow access if it matches the request
+        if (cart.userId && req.query.userId !== cart.userId) {
+            return res.status(403).json({ message: 'Access denied' });
         }
 
         cart.items = cart.items.filter(item => 
