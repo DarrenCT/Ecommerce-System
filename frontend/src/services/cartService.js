@@ -18,6 +18,12 @@ export const cartService = {
       const response = await axios.get(`/api/cart/${cartId}`);
       return response.data;
     } catch (error) {
+      if (error.response?.status === 404) {
+        const userId = null; // Guest cart
+        const newCart = await this.createCart(userId);
+        localStorage.setItem('cartId', newCart.cartId);
+        return newCart;
+      }
       throw new Error('Failed to fetch cart');
     }
   },
@@ -30,6 +36,19 @@ export const cartService = {
       });
       return response.data;
     } catch (error) {
+      // If cart not found, create a new one and try again
+      if (error.response?.status === 404) {
+        const userId = null; // Guest cart
+        const newCart = await this.createCart(userId);
+        localStorage.setItem('cartId', newCart.cartId);
+        
+        // Retry adding item with new cart
+        const response = await axios.post(`/api/cart/${newCart.cartId}/items`, {
+          productId,
+          quantity
+        });
+        return response.data;
+      }
       throw new Error('Failed to add item to cart');
     }
   },
