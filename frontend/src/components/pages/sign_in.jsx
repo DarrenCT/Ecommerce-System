@@ -37,11 +37,11 @@ function SignInPage() {
             </div>
           )}
         </div>
-        <form className="mt-12 space-y-10" onSubmit={handleSubmit}>
-          <div className="space-y-8">
+        <form className="mt-12 space-y-8" onSubmit={handleSubmit}>
+          <div className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-xl font-medium text-gray-700">
-                Email address
+                Email
               </label>
               <input
                 id="email"
@@ -49,7 +49,7 @@ function SignInPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Email"
+                placeholder="Enter your email"
                 autoComplete="email"
                 className="mt-2 block w-full px-6 py-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-amazon-light focus:border-amazon-light text-xl"
               />
@@ -64,7 +64,7 @@ function SignInPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="••••••••"
+                placeholder="Enter your password"
                 autoComplete="current-password"
                 className="mt-2 block w-full px-6 py-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-amazon-light focus:border-amazon-light text-xl"
               />
@@ -91,15 +91,17 @@ function SignInPage() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full flex justify-center py-4 px-6 border border-transparent rounded-lg shadow-sm text-xl font-medium text-white bg-amazon-light hover:bg-amazon-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amazon-light ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            {loading ? 'Signing in...' : 'Sign in'}
-          </button>
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full flex justify-center py-4 px-6 border border-transparent rounded-lg shadow-md text-xl font-medium text-black bg-amazon-yellow hover:bg-amazon-orange focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amazon-light ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </div>
         </form>
         <p className="mt-4 text-center text-lg text-gray-600">
           Not registered?{' '}
