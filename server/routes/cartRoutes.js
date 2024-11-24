@@ -20,7 +20,7 @@ router.get('/api/cart/:cartId', async (req, res) => {
         }
 
         // If cart has a userId, only allow access if it matches the request
-        if (cart.userId && req.query.userId !== cart.userId) {
+        if (cart.userId && (!req.query.userId || req.query.userId.toString() !== cart.userId.toString())) {
             return res.status(403).json({ message: 'Access denied' });
         }
         
@@ -77,7 +77,7 @@ router.post('/api/cart/:cartId/items', async (req, res) => {
         }
 
         // If cart has a userId, only allow access if it matches the request
-        if (cart.userId && req.query.userId !== cart.userId) {
+        if (cart.userId && (!req.query.userId || req.query.userId.toString() !== cart.userId.toString())) {
             return res.status(403).json({ message: 'Access denied' });
         }
 
@@ -178,7 +178,7 @@ router.put('/api/cart/:cartId/items/:productId', async (req, res) => {
         }
 
         // If cart has a userId, only allow access if it matches the request
-        if (cart.userId && req.query.userId !== cart.userId) {
+        if (cart.userId && (!req.query.userId || req.query.userId.toString() !== cart.userId.toString())) {
             return res.status(403).json({ message: 'Access denied' });
         }
 
@@ -228,7 +228,7 @@ router.delete('/api/cart/:cartId/items/:productId', async (req, res) => {
         }
 
         // If cart has a userId, only allow access if it matches the request
-        if (cart.userId && req.query.userId !== cart.userId) {
+        if (cart.userId && (!req.query.userId || req.query.userId.toString() !== cart.userId.toString())) {
             return res.status(403).json({ message: 'Access denied' });
         }
 
@@ -263,25 +263,23 @@ router.delete('/api/cart/:cartId/items/:productId', async (req, res) => {
 // Update cart with userId
 router.put('/api/cart/:cartId/user', async (req, res) => {
     try {
-        const { userId } = req.body;
-        
-        let cart = await Cart.findOne({ cartId: req.params.cartId });
+        const cart = await Cart.findOne({ cartId: req.params.cartId });
         if (!cart) {
-            // If no cart exists, create one with the userId
-            cart = new Cart({ 
-                cartId: req.params.cartId,
-                userId: userId,
-                items: [] 
-            });
-        } else {
-            // Update existing cart with userId
-            cart.userId = userId;
+            return res.status(404).json({ message: 'Cart not found' });
         }
-        
+
+        // Only allow updating user for guest carts
+        if (cart.userId) {
+            return res.status(403).json({ message: 'Cannot update user for existing user cart' });
+        }
+
+        const { userId } = req.body;
+        cart.userId = userId;
         await cart.save();
+        
         res.json(cart);
     } catch (error) {
-        res.status(500).json({ message: 'Error updating cart with user ID', error: error.message });
+        res.status(500).json({ message: 'Error updating cart user', error: error.message });
     }
 });
 

@@ -54,62 +54,40 @@ export const cartService = {
     }
   },
 
-  async getOrCreateCart(userId = null) {
+  async getOrCreateCart() {
     try {
-      // Check for existing cart in localStorage
-      const existingCartId = localStorage.getItem('cartId');
-      
-      if (existingCartId) {
+      const cartId = localStorage.getItem('cartId');
+      const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+      const userId = auth.user?.userId;
+
+      if (cartId) {
         try {
-          const cart = await this.getCart(existingCartId);
+          const cart = await this.getCart(cartId);
           
-          // If logged in
-          if (userId) {
-            // If this is a guest cart, update it with user ID
-            if (!cart.userId) {
-              const updatedCart = await this.updateCartUser(cart.cartId, userId);
-              return updatedCart;
-            }
-            // If this is a user cart but belongs to a different user, create new cart
-            if (cart.userId !== userId) {
-              localStorage.removeItem('cartId');
-              const newCart = await this.createCart(userId);
-              localStorage.setItem('cartId', newCart.cartId);
-              return newCart;
-            }
-          } else {
-            // If logged out, only use cart if it's a guest cart
-            if (cart.userId) {
-              localStorage.removeItem('cartId');
-              const newCart = await this.createCart(null);
-              localStorage.setItem('cartId', newCart.cartId);
-              return newCart;
-            }
+          // If user is logged in and cart is a guest cart, convert it
+          if (userId && !cart.userId) {
+            const updatedCart = await this.updateCartUser(cartId, userId);
+            return updatedCart;
           }
+          
+          // If user is logged out but trying to access a user cart, create new guest cart
+          if (!userId && cart.userId) {
+            const newCart = await this.createCart(null);
+            localStorage.setItem('cartId', newCart.cartId);
+            return newCart;
+          }
+          
           return cart;
         } catch (error) {
-          // If cart not found or error, remove from localStorage
-          localStorage.removeItem('cartId');
-        }
-      }
-
-      // If logged in, try to find existing user cart
-      if (userId) {
-        try {
-          const userCart = await this.getUserCart(userId);
-          if (userCart) {
-            localStorage.setItem('cartId', userCart.cartId);
-            return userCart;
-          }
-        } catch (error) {
-          console.error('Error fetching user cart:', error);
+          console.log('Error fetching existing cart:', error);
+          // Continue to create new cart
         }
       }
 
       // Create new cart
-      const newCart = await this.createCart(userId);
-      localStorage.setItem('cartId', newCart.cartId);
-      return newCart;
+      const response = await axios.post('/api/cart', { userId });
+      localStorage.setItem('cartId', response.data.cartId);
+      return response.data;
     } catch (error) {
       throw new Error('Failed to get or create cart');
     }
