@@ -71,7 +71,7 @@ router.post('/api/cart', async (req, res) => {
 // Add item to cart
 router.post('/api/cart/:cartId/items', async (req, res) => {
     try {
-        const cart = await Cart.findOne({ cartId: req.params.cartId });
+        let cart = await Cart.findOne({ cartId: req.params.cartId });
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
         }

@@ -21,6 +21,7 @@ const ProductDetailsPage = () => {
     const [error, setError] = useState(null);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+    const [toastType, setToastType] = useState('success');
     const { isAuthenticated, user } = useAuth();
     const { id } = useParams();
 
@@ -45,6 +46,7 @@ const ProductDetailsPage = () => {
     const addToCart = async () => {
         if (product.quantity <= 0) {
             setToastMessage('Sorry, this item is out of stock');
+            setToastType('error');
             setShowToast(true);
             return;
         }
@@ -55,10 +57,12 @@ const ProductDetailsPage = () => {
             await cartService.addToCart(cart.cartId, product._id, 1);
             
             setToastMessage('Item added to cart successfully!');
+            setToastType('success');
             setShowToast(true);
         } catch (error) {
             console.error('Error adding to cart:', error);
             setToastMessage('Error adding item to cart');
+            setToastType('error');
             setShowToast(true);
         }
     };
@@ -130,8 +134,8 @@ const ProductDetailsPage = () => {
             {showToast && (
                 <Toast
                     message={toastMessage}
+                    type={toastType}
                     onClose={() => setShowToast(false)}
-                    duration={3000}
                 />
             )}
         </>

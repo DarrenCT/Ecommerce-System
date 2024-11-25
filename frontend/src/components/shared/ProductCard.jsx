@@ -9,6 +9,7 @@ const ProductCard = ({ product }) => {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [toastDuration, setToastDuration] = useState(3000);
+    const [toastType, setToastType] = useState('success');
     const { isAuthenticated, user } = useAuth();
 
     const isOutOfStock = product.quantity <= 0;
@@ -17,6 +18,7 @@ const ProductCard = ({ product }) => {
         if (isOutOfStock) {
             setToastMessage('Sorry, this item is out of stock');
             setToastDuration(2000);
+            setToastType('error');
             setShowToast(true);
             return;
         }
@@ -28,11 +30,13 @@ const ProductCard = ({ product }) => {
 
             setToastMessage('Item added to cart successfully!');
             setToastDuration(3000);
+            setToastType('success');
             setShowToast(true);
         } catch (error) {
             console.error('Error adding to cart:', error);
             setToastMessage('Error adding item to cart');
             setToastDuration(3000);
+            setToastType('error');
             setShowToast(true);
         }
     };
@@ -68,6 +72,7 @@ const ProductCard = ({ product }) => {
                 <Toast 
                     message={toastMessage}
                     duration={toastDuration}
+                    type={toastType}
                     onClose={() => setShowToast(false)}
                 />
             )}
