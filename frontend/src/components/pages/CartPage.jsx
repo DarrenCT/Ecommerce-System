@@ -65,7 +65,7 @@ const CartPage = () => {
     const handleCheckout = () => {
         if (!isAuthenticated) {
             // Show warning message
-            alert('Please log in to proceed with checkout');
+            alert('Please log in or sign up to proceed with checkout');
             return;
         }
         navigate('/checkout');
