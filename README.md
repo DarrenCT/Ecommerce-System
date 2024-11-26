@@ -34,7 +34,7 @@ Setup environment variables
 Start backend server
 - `npm run dev`
 ### 3. Frontend Setup
-- `cd ../client`
+- `cd ../frontend`
 
 Install all dependencies
 - `npm install`
