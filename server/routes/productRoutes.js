@@ -171,12 +171,12 @@ router.put('/api/products/:id/quantity', async (req, res) => {
   try {
       const product = await Product.findById(req.params.id);
       if (!product) {
-          return res.status(404).json({ message: 'Product not found' }); // Add return here
+          return res.status(404).json({ message: 'Product not found' }); 
       }
 
       product.quantity += quantityChange;
       if (product.quantity < 0) {
-          return res.status(400).json({ message: 'Quantity cannot be less than zero' }); // Add return here
+          return res.status(400).json({ message: 'Quantity cannot be less than zero' }); 
       }
 
       await product.save();
