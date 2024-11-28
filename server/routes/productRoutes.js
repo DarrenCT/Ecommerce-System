@@ -146,4 +146,64 @@ router.get('/api/categories', async (req, res) => {
   }
 });
 
+/*
+//inventory updates
+router.put('/api/products/:id/quantity', async (req, res) => {
+  const { quantityChange } = req.body; // Accept a value to add or reduce inventory
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    product.quantity += quantityChange; // Adjust quantity
+    if (product.quantity < 0) {
+      return res.status(400).json({ message: 'Quantity cannot be less than zero' });
+    }
+    await product.save();
+    res.json({ message: 'Product quantity updated successfully', product });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating product quantity', error: error.message });
+  }
+});
+*/
+router.put('/api/products/:id/quantity', async (req, res) => {
+  const { quantityChange } = req.body;
+  try {
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+          return res.status(404).json({ message: 'Product not found' }); // Add return here
+      }
+
+      product.quantity += quantityChange;
+      if (product.quantity < 0) {
+          return res.status(400).json({ message: 'Quantity cannot be less than zero' }); // Add return here
+      }
+
+      await product.save();
+      res.json({ message: 'Product quantity updated successfully', product });
+  } catch (error) {
+      console.error('Error updating product quantity:', error);
+      res.status(500).json({ message: 'Error updating product quantity', error: error.message });
+  }
+});
+
+
+//toggle between login 
+// Middleware to mock login state
+const loginState = { isLoggedIn: false }; // Initial state
+
+const mockLoginMiddleware = (req, res, next) => {
+  req.loginState = loginState;
+  next();
+};
+
+// Toggle login state
+router.post('/api/login/toggle', (req, res) => {
+  loginState.isLoggedIn = !loginState.isLoggedIn;
+  res.json({ isLoggedIn: loginState.isLoggedIn });
+});
+
+router.use(mockLoginMiddleware);
+
+
 export default router;
