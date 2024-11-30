@@ -15,8 +15,8 @@ const InventoryManagement = () => {
             try {
                 console.log('Fetching products...');
                 const response = await axios.get('http://localhost:5000/api/products');
-                console.log('Fetched products:', response.data); // Log fetched data
-                setProducts(response.data);
+                console.log('Fetched products:', response.data);
+                setProducts(response.data.products); // Update this line to access the products array
             } catch (error) {
                 console.error('Error fetching products:', error);
                 setMessage('Failed to load products');
@@ -50,11 +50,13 @@ const InventoryManagement = () => {
                 onChange={(e) => setSelectedProduct(e.target.value)}
             >
                 <option value="">-- Select a Product --</option>
-                {products.map((product) => (
+                {Array.isArray(products) ? products.map((product) => (
                     <option key={product._id} value={product._id}>
-                        {product.item_name[0]?.value || 'Unnamed Product'}
+                        {(product.item_name && Array.isArray(product.item_name) && product.item_name[0]?.value) 
+                            || (typeof product.item_name === 'string' && product.item_name) 
+                            || 'Unnamed Product'}
                     </option>
-                ))}
+                )) : <option value="">No products available</option>}
             </select>
 
             <label htmlFor="quantity-change">Quantity Change:</label>
