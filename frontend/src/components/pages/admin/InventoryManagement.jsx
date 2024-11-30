@@ -7,8 +7,20 @@ const InventoryManagement = () => {
     const [selectedProduct, setSelectedProduct] = useState('');
     const [quantityChange, setQuantityChange] = useState(0);
     const [message, setMessage] = useState('');
+    const [isError, setIsError] = useState(false);
 
-
+    const styles = {
+        error: {
+            color: 'red',
+            fontWeight: 'bold',
+            marginTop: '10px',
+        },
+        success: {
+            color: 'green',
+            fontWeight: 'bold',
+            marginTop: '10px',
+        },
+    };
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -16,7 +28,7 @@ const InventoryManagement = () => {
                 console.log('Fetching products...');
                 const response = await axios.get('http://localhost:5000/api/products');
                 console.log('Fetched products:', response.data);
-                setProducts(response.data.products); // Update this line to access the products array
+                setProducts(response.data.products); 
             } catch (error) {
                 console.error('Error fetching products:', error);
                 setMessage('Failed to load products');
@@ -26,50 +38,76 @@ const InventoryManagement = () => {
     }, []);
     
 
-    const handleUpdate = async () => {
-        try {
-            const response = await axios.put(`/api/products/${selectedProduct}/quantity`, {
-                quantityChange,
-            });
-            setMessage(response.data.message);
-        } catch (error) {
-            console.error('Error updating product:', error);
-            setMessage(error.response?.data?.message || 'Failed to update inventory');
-        }
-    };
+const handleUpdate = async () => {
+    if (!selectedProduct || quantityChange === '') {
+        setMessage('Please enter a valid product ID and quantity change.');
+        setIsError(true); 
+        return;
+    }
 
+    try {
+        const response = await axios.put(`http://localhost:5000/api/products/${selectedProduct}/quantity`, {
+            quantityChange: Number(quantityChange),
+        });
+
+        setMessage(response.data.message);
+        setIsError(false); 
+    } catch (error) {
+        if (error.response?.status === 404) {
+            setMessage('Product ID not found. Please check the ID and try again.');
+        } else if (error.response?.status === 400) {
+            setMessage(error.response?.data?.message || 'Invalid quantity.');
+        } else {
+            setMessage('Failed to update inventory. Please try again later.');
+        }
+        setIsError(true);
+    }
+};
     return (
         <div>
-            dco<h1>Inventory Management</h1>
-            {message && <p>{message}</p>}
+            <h1 style={{ color: 'rgb(19, 25, 33)', fontWeight:'bold', fontSize:'2rem'}}>Inventory Management</h1>
+            <br></br>
+            <label htmlFor="product-select" style= {{fontWeight: 'bold'}}>Product ID:   </label>
 
-            <label htmlFor="product-select">Select Product:</label>
-            <select
-                id="product-select"
-                value={selectedProduct}
-                onChange={(e) => setSelectedProduct(e.target.value)}
-            >
-                <option value="">-- Select a Product --</option>
-                {Array.isArray(products) ? products.map((product) => (
-                    <option key={product._id} value={product._id}>
-                        {(product.item_name && Array.isArray(product.item_name) && product.item_name[0]?.value) 
-                            || (typeof product.item_name === 'string' && product.item_name) 
-                            || 'Unnamed Product'}
-                    </option>
-                )) : <option value="">No products available</option>}
-            </select>
-
-            <label htmlFor="quantity-change">Quantity Change:</label>
             <input
+             style={{
+                backgroundColor: '#FFFFFF'}}
+        type="text"
+        id="product-id"
+        value={selectedProduct}
+        onChange={(e) => setSelectedProduct(e.target.value)}
+        
+    />
+
+            <br></br><br></br>
+            <label htmlFor="quantity-change" style={{fontWeight: 'bold'}}>Quantity Change:   </label>
+            <input
+                style={{
+                    backgroundColor: '#FFFFFF'}}
                 type="number"
                 id="quantity-change"
                 value={quantityChange}
-                onChange={(e) => setQuantityChange(Number(e.target.value))}
+                onChange={(e) => {
+                    const value = e.target.value;
+                    setQuantityChange(value === '' ? '' : Number(value));
+                }}
             />
-
-            <button onClick={handleUpdate} disabled={!selectedProduct}>
-                Update Inventory
+            <br></br><br></br>
+            <button onClick={handleUpdate} disabled={!selectedProduct} style={{
+        backgroundColor: 'rgb(254, 189, 105)', 
+        border: 'none',
+        borderRadius: '5px',
+        padding: '10px 15px',
+        fontSize: '16px',
+        fontWeight: 'bold'
+    }}>
+        Update Inventory
             </button>
+             {message && (
+                <p style={isError ? styles.error : styles.success}>
+                    {message}
+                </p>
+            )}
         </div>
     );
 };

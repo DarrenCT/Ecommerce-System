@@ -160,7 +160,7 @@ router.put('/api/products/:id/quantity', async (req, res) => {
       }
 
       await product.save();
-      res.json({ message: 'Product quantity updated successfully', product });
+      res.json({ message: 'Product quantity updated successfully!', product });
   } catch (error) {
       console.error('Error updating product quantity:', error);
       res.status(500).json({ message: 'Error updating product quantity', error: error.message });
