@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+
 const InventoryManagement = () => {
     const [products, setProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState('');
     const [quantityChange, setQuantityChange] = useState(0);
     const [message, setMessage] = useState('');
 
+
+
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get('/api/products');
+                console.log('Fetching products...');
+                const response = await axios.get('http://localhost:5000/api/products');
+                console.log('Fetched products:', response.data); // Log fetched data
                 setProducts(response.data);
             } catch (error) {
                 console.error('Error fetching products:', error);
@@ -19,6 +24,7 @@ const InventoryManagement = () => {
         };
         fetchProducts();
     }, []);
+    
 
     const handleUpdate = async () => {
         try {
