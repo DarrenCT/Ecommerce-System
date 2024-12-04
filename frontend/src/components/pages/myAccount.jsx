@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/DevAuthContext';
-import CreditCardModal from './creditCard';
+import CreditCard from './creditCard';
 
 const MyAccount = () => {
   const { user, isAuthenticated } = useAuth();
@@ -281,12 +281,10 @@ const MyAccount = () => {
       </div>
 
       {/* Credit Card Modal */}
-      {isCreditCardModalOpen && (
-        <CreditCardModal
-          onClose={() => setIsCreditCardModalOpen(false)}
-          onSave={handleSaveCreditCard}
-        />
-      )}
+      <CreditCard
+        isOpen={isCreditCardModalOpen}
+        onClose={() => setIsCreditCardModalOpen(false)}
+      />
     </div>
   );
 };
