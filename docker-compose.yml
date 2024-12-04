@@ -13,6 +13,11 @@ services:
       - backend
     networks:
       - app-network
+    develop:
+      watch:
+        - path: ./frontend/src
+          target: /app/src
+          action: sync
 
   backend:
     build:
@@ -28,6 +33,11 @@ services:
       - ./server/.env
     networks:
       - app-network
+    develop:
+      watch:
+        - path: ./server
+          target: /app
+          action: sync
 
 networks:
   app-network:
