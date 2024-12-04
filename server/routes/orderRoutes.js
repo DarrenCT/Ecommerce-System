@@ -16,14 +16,9 @@ router.post('/api/orders', async (req, res) => {
             return res.status(404).json({ message: 'Cart not found' });
         }
 
-        // Verify cart belongs to user
-        if (cart.userId && cart.userId.toString() !== userId) {
-            return res.status(403).json({ message: 'Not authorized to access this cart' });
-        }
-
-        // Create the order
+        // Create the order with string userId
         const order = new Order({
-            userId,
+            userId: userId.toString(), // Convert userId to string to ensure compatibility
             cartId,
             items: cart.items.map(item => ({
                 product: item.product._id,
@@ -32,12 +27,13 @@ router.post('/api/orders', async (req, res) => {
             })),
             totalAmount: cart.totalAmount,
             shippingAddress,
-            billingAddress
+            billingAddress,
+            status: 'pending' // Add default status
         });
 
         await order.save();
 
-        // Clear the cart
+        // Clear the cart (optional)
         cart.items = [];
         await cart.save();
 
@@ -46,9 +42,64 @@ router.post('/api/orders', async (req, res) => {
             orderId: order._id 
         });
     } catch (error) {
-        console.error('Order creation error:', error);
+        console.error('Error in /api/orders:', error);
         res.status(500).json({ 
             message: 'Error creating order', 
+            error: error.message 
+        });
+    }
+});
+
+router.get('/api/orders/history', async (req, res) => {
+    try {
+        const { customerId, productId, startDate, endDate } = req.query;
+        
+        // Build the query
+        const query = {};
+        
+        if (customerId) {
+            query.userId = customerId;
+        }
+        
+        if (productId) {
+            query['items.product'] = productId;
+        }
+        
+        if (startDate || endDate) {
+            query.createdAt = {};
+            if (startDate) {
+                query.createdAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                query.createdAt.$lte = new Date(endDate);
+            }
+        }
+
+        // Get orders with populated product details
+        const orders = await Order.find(query)
+            .populate({
+                path: 'items.product',
+                select: 'item_name price' // Select item_name instead of name
+            })
+            .sort({ createdAt: -1 });
+
+        // Convert timestamps to Toronto time
+        const torontoOrders = orders.map(order => {
+            const orderObj = order.toObject();
+            const torontoTime = new Date(order.createdAt).toLocaleString("en-US", {
+                timeZone: "America/Toronto"
+            });
+            return {
+                ...orderObj,
+                createdAt: torontoTime
+            };
+        });
+
+        res.json(torontoOrders);
+    } catch (error) {
+        console.error('Error in /api/orders/history:', error);
+        res.status(500).json({ 
+            message: 'Error fetching sales history', 
             error: error.message 
         });
     }
@@ -76,4 +127,4 @@ router.get('/api/orders/:orderId', async (req, res) => {
     }
 });
 
-export default router; 
+export default router;
