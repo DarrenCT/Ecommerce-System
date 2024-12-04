@@ -12,12 +12,38 @@ const CheckoutPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [paymentError, setPaymentError] = useState(null);
-    const [paymentAttempts, setPaymentAttempts] = useState(0);
+    const [userDetails, setUserDetails] = useState(null);
     const [formData, setFormData] = useState({
-        shippingAddress: user?.address || '',
-        creditCard: ''
+        useDefaultShipping: true,
+        useDefaultPayment: true,
+        shippingAddress: '',
+        alternateShipping: '',
+        defaultCreditCard: null,
+        alternateCreditCard: {
+            cardNumber: '',
+            expiryDate: '',
+            cvv: ''
+        }
     });
     const creditCardInputRef = useRef(null);
+
+    // Fetch user details including address and credit card
+    const fetchUserDetails = async () => {
+        try {
+            const response = await axios.get(`http://localhost:5000/user/${user.userId}`);
+            setUserDetails(response.data);
+
+            // Update form data with user details
+            setFormData(prev => ({
+                ...prev,
+                shippingAddress: response.data.address || '',
+                defaultCreditCard: response.data.creditCards?.[0] || null
+            }));
+        } catch (error) {
+            console.error('Error fetching user details:', error);
+            setError('Error fetching user details');
+        }
+    };
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -25,24 +51,28 @@ const CheckoutPage = () => {
             return;
         }
 
-        const fetchCart = async () => {
+        // Fetch user details and cart data
+        const initializeCheckout = async () => {
             try {
+                setLoading(true);
+                await fetchUserDetails();
+
                 const cartId = localStorage.getItem('cartId');
                 if (!cartId) {
                     navigate('/cart');
                     return;
                 }
-                const response = await cartService.getCart(cartId);
-                setCart(response);
+                const cartResponse = await cartService.getCart(cartId);
+                setCart(cartResponse);
             } catch (error) {
-                setError('Error fetching cart data');
+                setError('Error initializing checkout');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchCart();
-    }, [isAuthenticated, navigate]);
+        initializeCheckout();
+    }, [isAuthenticated, navigate, user]);
 
     useEffect(() => {
         if (paymentError && creditCardInputRef.current) {
@@ -73,17 +103,26 @@ const CheckoutPage = () => {
         const response = await axios.post('/api/payments/validate', {
             creditCard
         });
-        
+
         if (!response.data.success) {
             throw new Error(response.data.message);
         }
-        
+
         return true;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!cart || !formData.shippingAddress || !formData.creditCard) {
+
+        const activeShipping = formData.useDefaultShipping
+            ? formData.shippingAddress
+            : formData.alternateShipping;
+
+        const activePayment = formData.useDefaultPayment
+            ? formData.defaultCreditCard
+            : formData.alternateCreditCard;
+
+        if (!cart || !activeShipping || !activePayment) {
             setError('Please fill in all required fields');
             return;
         }
@@ -94,19 +133,26 @@ const CheckoutPage = () => {
             setError(null);
 
             // Process payment first
-            await processDummyPayment(formData.creditCard);
+            await processDummyPayment(activePayment.cardNumber);
 
             const response = await axios.post('/api/orders', {
                 cartId: cart.cartId,
-                shippingAddress: formData.shippingAddress,
-                billingAddress: formData.shippingAddress,
-                creditCard: formData.creditCard
+                userId: user.userId,
+                shippingAddress: activeShipping,
+                billingAddress: activeShipping,
+                paymentMethod: {
+                    cardNumber: activePayment.cardNumber,
+                    expiryDate: activePayment.expiryDate,
+                    cvv: activePayment.cvv
+                },
+                usedDefaultShipping: formData.useDefaultShipping,
+                usedDefaultPayment: formData.useDefaultPayment
             });
 
             if (response.data.orderId) {
                 localStorage.removeItem('cartId');
                 navigate('/order-confirmation', {
-                    state: { 
+                    state: {
                         orderId: response.data.orderId,
                         message: 'Order placed successfully!'
                     }
@@ -117,7 +163,7 @@ const CheckoutPage = () => {
         } catch (error) {
             console.error('Error:', error);
             const errorMessage = error.response?.data?.message || error.message;
-            
+
             if (errorMessage.includes('Payment declined')) {
                 setPaymentError(errorMessage);
             } else {
@@ -142,31 +188,125 @@ const CheckoutPage = () => {
                     <div className="lg:col-span-2">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="bg-white p-6 rounded-lg shadow-sm">
-                                <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
-                                <textarea
-                                    name="shippingAddress"
-                                    value={formData.shippingAddress}
-                                    onChange={handleInputChange}
-                                    required
-                                    className="w-full h-32 p-2 border rounded-md"
-                                    placeholder="Enter your shipping address"
-                                />
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-xl font-semibold">Shipping Address</h2>
+                                    <label className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.useDefaultShipping}
+                                            onChange={(e) => setFormData(prev => ({
+                                                ...prev,
+                                                useDefaultShipping: e.target.checked
+                                            }))}
+                                            className="mr-2"
+                                        />
+                                        Use Default Address
+                                    </label>
+                                </div>
+
+                                {formData.useDefaultShipping ? (
+                                    <div className="mb-4">
+                                        <p className="font-medium">Default Address:</p>
+                                        <p className="whitespace-pre-line">{formData.shippingAddress}</p>
+                                    </div>
+                                ) : (
+                                    <textarea
+                                        name="alternateShipping"
+                                        value={formData.alternateShipping}
+                                        onChange={handleInputChange}
+                                        required
+                                        className="w-full h-32 p-2 border rounded-md"
+                                        placeholder="Enter alternate shipping address"
+                                    />
+                                )}
                             </div>
 
                             <div className="bg-white p-6 rounded-lg shadow-sm">
-                                <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
-                                <input
-                                    type="text"
-                                    name="creditCard"
-                                    value={formData.creditCard}
-                                    onChange={handleInputChange}
-                                    required
-                                    className="w-full p-2 border rounded-md"
-                                    placeholder="Enter credit card number"
-                                    ref={creditCardInputRef}
-                                />
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-xl font-semibold">Payment Information</h2>
+                                    <label className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.useDefaultPayment}
+                                            onChange={(e) => setFormData(prev => ({
+                                                ...prev,
+                                                useDefaultPayment: e.target.checked
+                                            }))}
+                                            className="mr-2"
+                                        />
+                                        Use Default Payment
+                                    </label>
+                                </div>
+
+                                {formData.useDefaultPayment ? (
+                                    <div className="mb-4">
+                                        <p className="font-medium">Default Payment Method:</p>
+                                        {formData.defaultCreditCard ? (
+                                            <p>Card ending in {formData.defaultCreditCard.cardNumber.slice(-4)}</p>
+                                        ) : (
+                                            <p>No default payment method saved</p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block mb-1">Card Number</label>
+                                            <input
+                                                type="text"
+                                                name="cardNumber"
+                                                value={formData.alternateCreditCard.cardNumber}
+                                                onChange={(e) => setFormData(prev => ({
+                                                    ...prev,
+                                                    alternateCreditCard: {
+                                                        ...prev.alternateCreditCard,
+                                                        cardNumber: e.target.value
+                                                    }
+                                                }))}
+                                                className="w-full p-2 border rounded-md"
+                                                placeholder="Enter card number"
+                                                ref={creditCardInputRef}
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block mb-1">Expiry Date</label>
+                                                <input
+                                                    type="text"
+                                                    name="expiryDate"
+                                                    value={formData.alternateCreditCard.expiryDate}
+                                                    onChange={(e) => setFormData(prev => ({
+                                                        ...prev,
+                                                        alternateCreditCard: {
+                                                            ...prev.alternateCreditCard,
+                                                            expiryDate: e.target.value
+                                                        }
+                                                    }))}
+                                                    className="w-full p-2 border rounded-md"
+                                                    placeholder="MM/YY"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block mb-1">CVV</label>
+                                                <input
+                                                    type="text"
+                                                    name="cvv"
+                                                    value={formData.alternateCreditCard.cvv}
+                                                    onChange={(e) => setFormData(prev => ({
+                                                        ...prev,
+                                                        alternateCreditCard: {
+                                                            ...prev.alternateCreditCard,
+                                                            cvv: e.target.value
+                                                        }
+                                                    }))}
+                                                    className="w-full p-2 border rounded-md"
+                                                    placeholder="CVV"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                                 {paymentError && (
-                                    <div className="payment-error-message" style={{ color: 'red', marginTop: '5px', fontSize: '14px' }}>
+                                    <div className="text-red-500 mt-2 text-sm">
                                         {paymentError}
                                     </div>
                                 )}

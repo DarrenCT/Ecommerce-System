@@ -6,8 +6,7 @@ const router = express.Router();
 
 router.post('/api/orders', async (req, res) => {
     try {
-        const { cartId, shippingAddress, billingAddress } = req.body;
-        const userId = req.user.id; // From the auth middleware
+        const { cartId, shippingAddress, billingAddress, userId } = req.body;
 
         // Get the cart
         const cart = await Cart.findOne({ cartId })
@@ -15,6 +14,11 @@ router.post('/api/orders', async (req, res) => {
 
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
+        }
+
+        // Verify cart belongs to user
+        if (cart.userId && cart.userId.toString() !== userId) {
+            return res.status(403).json({ message: 'Not authorized to access this cart' });
         }
 
         // Create the order
@@ -33,7 +37,7 @@ router.post('/api/orders', async (req, res) => {
 
         await order.save();
 
-        // Clear the cart (optional)
+        // Clear the cart
         cart.items = [];
         await cart.save();
 
@@ -42,6 +46,7 @@ router.post('/api/orders', async (req, res) => {
             orderId: order._id 
         });
     } catch (error) {
+        console.error('Order creation error:', error);
         res.status(500).json({ 
             message: 'Error creating order', 
             error: error.message 
