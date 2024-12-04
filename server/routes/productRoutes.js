@@ -146,4 +146,29 @@ router.get('/api/categories', async (req, res) => {
   }
 });
 
+router.put('/api/products/:id/quantity', async (req, res) => {
+  const { quantityChange } = req.body;
+  try {
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+          return res.status(404).json({ message: 'Product not found' }); 
+      }
+
+      product.quantity += quantityChange;
+      if (product.quantity < 0) {
+          return res.status(400).json({ message: 'Quantity cannot be less than zero' }); 
+      }
+
+      await product.save();
+      res.json({ message: 'Product quantity updated successfully!', product });
+  } catch (error) {
+      console.error('Error updating product quantity:', error);
+      res.status(500).json({ message: 'Error updating product quantity', error: error.message });
+  }
+});
+
+
+
+
+
 export default router;
