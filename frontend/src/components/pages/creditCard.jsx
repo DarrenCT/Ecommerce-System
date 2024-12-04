@@ -109,7 +109,7 @@ const CreditCard = ({ isOpen, onClose }) => {
                           <p className="text-sm text-gray-500">Expires {card.expiryDate}</p>
                         </div>
                         <button
-                          onClick={() => handleDeleteCard(card._id)}
+                          onClick={() => handleDeleteCard(card.cardId)}
                           className="text-red-600 hover:text-red-700 focus:outline-none"
                         >
                           Delete
