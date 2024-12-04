@@ -139,13 +139,13 @@ const MyAccount = () => {
           {!isEditing && (
             <div className="space-x-4">
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                 onClick={() => setIsEditing(true)}
               >
                 Edit Profile
               </button>
               <button
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
                 onClick={() => setIsCreditCardModalOpen(true)}
               >
                 Manage Payment Methods
@@ -209,13 +209,13 @@ const MyAccount = () => {
             </div>
             <div className="flex space-x-4">
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                 onClick={handleSave}
               >
                 Save Changes
               </button>
               <button
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                 onClick={() => setIsEditing(false)}
               >
                 Cancel
