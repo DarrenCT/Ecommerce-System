@@ -169,7 +169,7 @@ const MyAccount = () => {
               <p className="font-medium">{formData.phoneNumber || 'Not provided'}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Address</p>
+              <p className="text-sm text-gray-600">Shipping Address</p>
               <p className="font-medium">{formData.address || 'Not provided'}</p>
             </div>
           </div>
