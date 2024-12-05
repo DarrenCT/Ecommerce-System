@@ -31,8 +31,7 @@ router.post('/api/orders', async (req, res) => {
             })),
             totalAmount: cart.totalAmount,
             shippingAddress,
-            billingAddress,
-            status: 'pending'
+            billingAddress
         });
 
         await order.save();
