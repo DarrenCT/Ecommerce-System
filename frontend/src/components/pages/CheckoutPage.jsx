@@ -122,12 +122,6 @@ const CheckoutPage = () => {
             return;
         }
 
-        if (!user || !user.id) {
-            setError('You must be logged in to place an order');
-            navigate('/login');
-            return;
-        }
-
         try {
             setLoading(true);
             setPaymentError(null);
