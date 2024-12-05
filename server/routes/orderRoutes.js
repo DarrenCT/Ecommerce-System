@@ -16,9 +16,13 @@ router.post('/api/orders', async (req, res) => {
             return res.status(404).json({ message: 'Cart not found' });
         }
 
-        // Create the order with string userId
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        // Create the order
         const order = new Order({
-            userId: userId.toString(), // Convert userId to string to ensure compatibility
+            userId,
             cartId,
             items: cart.items.map(item => ({
                 product: item.product._id,
@@ -28,7 +32,7 @@ router.post('/api/orders', async (req, res) => {
             totalAmount: cart.totalAmount,
             shippingAddress,
             billingAddress,
-            status: 'pending' // Add default status
+            status: 'pending'
         });
 
         await order.save();

@@ -133,7 +133,7 @@ const CheckoutPage = () => {
             // Create order
             const orderData = {
                 cartId: cart.cartId,
-                userId: user.id,
+                userId: user.userId,
                 shippingAddress: selectedAddress,
                 billingAddress: selectedAddress,
             };
