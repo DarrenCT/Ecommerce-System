@@ -38,7 +38,7 @@ const CustomerDetails = () => {
         try {
             await axios.put(`/api/customers/${id}`, updatedData);
             alert('Customer information updated successfully');
-            navigate('/admin/customers'); // Redirect back to user management page
+            navigate('/users'); // Redirect back to user management page
         } catch (error) {
             console.error('Error updating customer:', error);
             alert('Failed to update customer information');
@@ -49,7 +49,15 @@ const CustomerDetails = () => {
 
     return (
         <div className="p-6">
-            <h1 className="text-3xl font-bold mb-6">Customer Details</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold">Customer Details</h1>
+                <button
+                    onClick={() => navigate('/users')}
+                    className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                >
+                    Back to Users
+                </button>
+            </div>
             {customer ? (
                 <form onSubmit={handleUpdate}>
                     <div className="mb-4">

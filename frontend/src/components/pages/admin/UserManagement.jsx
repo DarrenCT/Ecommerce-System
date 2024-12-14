@@ -59,7 +59,7 @@ const UserManagement = () => {
                             <td className="border p-2 text-center">
                                 <button
                                     className="bg-blue-500 text-white p-2 rounded"
-                                    onClick={() => navigate(`/admin/customers/${user._id}`)}
+                                    onClick={() => navigate(`/customers/${user.userId}`)}
                                 >
                                     View/Update
                                 </button>
