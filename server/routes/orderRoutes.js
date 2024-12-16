@@ -76,7 +76,7 @@ router.post('/api/orders', async (req, res) => {
 
 router.get('/api/orders/history', async (req, res) => {
     try {
-        const { customerId, productId, startDate, endDate } = req.query;
+        const { customerId, itemName, startDate, endDate } = req.query;
         
         // Build the query
         const query = {};
@@ -85,8 +85,16 @@ router.get('/api/orders/history', async (req, res) => {
             query.userId = customerId;
         }
         
-        if (productId) {
-            query['items.product'] = productId;
+        // If itemName is provided, first find products matching the name
+        let productIds = [];
+        if (itemName) {
+            const products = await Product.find({
+                'item_name.value': { $regex: new RegExp(itemName, 'i') }
+            });
+            productIds = products.map(product => product._id);
+            if (productIds.length > 0) {
+                query['items.product'] = { $in: productIds };
+            }
         }
         
         if (startDate || endDate) {

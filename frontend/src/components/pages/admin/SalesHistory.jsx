@@ -10,7 +10,7 @@ const SalesHistory = () => {
     // Filter states
     const [filters, setFilters] = useState({
         customerId: '',
-        productId: '',
+        itemName: '',
         startDate: '',
         endDate: ''
     });
@@ -71,9 +71,9 @@ const SalesHistory = () => {
                 />
                 <input
                     type="text"
-                    name="productId"
-                    placeholder="Filter by Product ID"
-                    value={filters.productId}
+                    name="itemName"
+                    placeholder="Filter by Item Name"
+                    value={filters.itemName}
                     onChange={handleFilterChange}
                     className="border p-2 rounded"
                 />
