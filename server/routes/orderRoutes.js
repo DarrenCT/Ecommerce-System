@@ -1,6 +1,7 @@
 import express from 'express';
 import Order from '../models/order.model.js';
 import Cart from '../models/cart.model.js';
+import Product from '../models/product.model.js';
 
 const router = express.Router();
 
@@ -16,9 +17,23 @@ router.post('/api/orders', async (req, res) => {
             return res.status(404).json({ message: 'Cart not found' });
         }
 
-        // Create the order with string userId
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        // Check if all products have sufficient quantity
+        for (const item of cart.items) {
+            const product = await Product.findById(item.product._id);
+            if (!product || product.quantity < item.quantity) {
+                return res.status(400).json({ 
+                    message: `Insufficient quantity available for product: ${product ? product.item_name[0].value : 'Unknown product'}`
+                });
+            }
+        }
+
+        // Create the order
         const order = new Order({
-            userId: userId.toString(), // Convert userId to string to ensure compatibility
+            userId,
             cartId,
             items: cart.items.map(item => ({
                 product: item.product._id,
@@ -27,17 +42,26 @@ router.post('/api/orders', async (req, res) => {
             })),
             totalAmount: cart.totalAmount,
             shippingAddress,
-            billingAddress,
-            status: 'pending' // Add default status
+            billingAddress
         });
 
+        // Save the order
         await order.save();
 
-        // Clear the cart (optional)
-        cart.items = [];
-        await cart.save();
+        // Update product quantities
+        const updatePromises = cart.items.map(item => 
+            Product.findByIdAndUpdate(
+                item.product._id,
+                { $inc: { quantity: -item.quantity } },
+                { new: true }
+            )
+        );
+        await Promise.all(updatePromises);
 
-        res.status(201).json({ 
+        // Delete the cart after successful order creation
+        await Cart.findOneAndDelete({ cartId });
+
+        res.status(201).json({
             message: 'Order created successfully',
             orderId: order._id 
         });
