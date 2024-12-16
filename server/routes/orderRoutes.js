@@ -103,7 +103,10 @@ router.get('/api/orders/history', async (req, res) => {
                 query.createdAt.$gte = new Date(startDate);
             }
             if (endDate) {
-                query.createdAt.$lte = new Date(endDate);
+                // Set endDate to the end of the day
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                query.createdAt.$lte = end;
             }
         }
 
