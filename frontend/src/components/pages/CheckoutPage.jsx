@@ -213,46 +213,53 @@ const CheckoutPage = () => {
 
                             <div className="bg-white p-6 rounded-lg shadow-sm">
                                 <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
-                                <div className="mb-4">
-                                    <label className="flex items-center space-x-2 mb-4">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.useDefaultCard}
-                                            onChange={(e) => setFormData(prev => ({
-                                                ...prev,
-                                                useDefaultCard: e.target.checked
-                                            }))}
-                                            className="form-checkbox"
-                                            disabled={!defaultCard}
-                                        />
-                                        <span>Use Default Credit Card</span>
-                                    </label>
-
-                                    {formData.useDefaultCard ? (
-                                        <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
-                                            <p className="font-medium text-gray-700">Default Card:</p>
-                                            <p className="mt-1 text-gray-600">
-                                                {defaultCard ? `Card ending in ${lastFourDigits}` : 'No card saved'}
-                                            </p>
-                                            {cardExpiry && (
-                                                <p className="mt-1 text-gray-600">Expires: {cardExpiry}</p>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-4">
+                                {!defaultCard ? (
+                                    <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                                        <p className="text-blue-800 mb-2">No credit card on file</p>
+                                        <p className="text-blue-600">Please add a credit card in your <Link to="/profile" className="text-blue-700 underline hover:text-blue-800">Account Settings</Link> before proceeding with checkout.</p>
+                                    </div>
+                                ) : (
+                                    <div className="mb-4">
+                                        <label className="flex items-center space-x-2 mb-4">
                                             <input
-                                                type="text"
-                                                name="alternateCard"
-                                                value={formData.alternateCard}
-                                                onChange={handleInputChange}
-                                                required
-                                                className="w-full p-2 border rounded-md"
-                                                placeholder="Enter credit card number"
-                                                ref={creditCardInputRef}
+                                                type="checkbox"
+                                                checked={formData.useDefaultCard}
+                                                onChange={(e) => setFormData(prev => ({
+                                                    ...prev,
+                                                    useDefaultCard: e.target.checked
+                                                }))}
+                                                className="form-checkbox"
+                                                disabled={!defaultCard}
                                             />
-                                        </div>
-                                    )}
-                                </div>
+                                            <span>Use Default Credit Card</span>
+                                        </label>
+
+                                        {formData.useDefaultCard ? (
+                                            <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
+                                                <p className="font-medium text-gray-700">Default Card:</p>
+                                                <p className="mt-1 text-gray-600">
+                                                    {defaultCard ? `Card ending in ${lastFourDigits}` : 'No card saved'}
+                                                </p>
+                                                {cardExpiry && (
+                                                    <p className="mt-1 text-gray-600">Expires: {cardExpiry}</p>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                <input
+                                                    type="text"
+                                                    name="alternateCard"
+                                                    value={formData.alternateCard}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    className="w-full p-2 border rounded-md"
+                                                    placeholder="Enter credit card number"
+                                                    ref={creditCardInputRef}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                                 {paymentError && (
                                     <div className="text-red-500 mt-2 text-sm">
                                         {paymentError}
