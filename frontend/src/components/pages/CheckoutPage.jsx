@@ -13,37 +13,11 @@ const CheckoutPage = () => {
     const [error, setError] = useState(null);
     const [paymentError, setPaymentError] = useState(null);
     const [paymentAttempts, setPaymentAttempts] = useState(0);
-    const [userData, setUserData] = useState(null);
     const [formData, setFormData] = useState({
-        useDefaultAddress: true,
-        useDefaultCard: true,
-        alternateAddress: '',
-        alternateCard: ''
+        shippingAddress: user?.address || '',
+        creditCard: ''
     });
     const creditCardInputRef = useRef(null);
-
-    useEffect(() => {
-        if (user) {
-            console.log('Current user:', user); // Debug log
-        }
-    }, [user]);
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const response = await axios.get('/api/auth/profile');
-                setUserData(response.data.user);
-                console.log('Fetched user data:', response.data.user); // Debug log
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-                setError('Error loading user data');
-            }
-        };
-
-        if (isAuthenticated) {
-            fetchUserData();
-        }
-    }, [isAuthenticated]);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -75,11 +49,6 @@ const CheckoutPage = () => {
             creditCardInputRef.current.focus();
         }
     }, [paymentError]);
-
-    const defaultAddress = userData?.address || user?.address || 'No address saved';
-    const defaultCard = userData?.creditCards?.[0]?.cardNumber || user?.creditCards?.[0]?.cardNumber || '';
-    const lastFourDigits = defaultCard ? defaultCard.slice(-4) : 'XXXX';
-    const cardExpiry = userData?.creditCards?.[0]?.expiryDate || user?.creditCards?.[0]?.expiryDate || '';
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -114,10 +83,7 @@ const CheckoutPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const selectedAddress = formData.useDefaultAddress ? defaultAddress : formData.alternateAddress;
-        const selectedCard = formData.useDefaultCard ? defaultCard : formData.alternateCard;
-
-        if (!cart || !selectedAddress || !selectedCard) {
+        if (!cart || !formData.shippingAddress || !formData.creditCard) {
             setError('Please fill in all required fields');
             return;
         }
@@ -128,17 +94,14 @@ const CheckoutPage = () => {
             setError(null);
 
             // Process payment first
-            await processDummyPayment(selectedCard);
+            await processDummyPayment(formData.creditCard);
 
-            // Create order
-            const orderData = {
+            const response = await axios.post('/api/orders', {
                 cartId: cart.cartId,
-                userId: user.userId,
-                shippingAddress: selectedAddress,
-                billingAddress: selectedAddress,
-            };
-
-            const response = await axios.post('/api/orders', orderData);
+                shippingAddress: formData.shippingAddress,
+                billingAddress: formData.shippingAddress,
+                creditCard: formData.creditCard
+            });
 
             if (response.data.orderId) {
                 localStorage.removeItem('cartId');
@@ -153,10 +116,12 @@ const CheckoutPage = () => {
             }
         } catch (error) {
             console.error('Error:', error);
-            if (error.response?.status === 400 && error.response?.data?.message?.includes('Payment')) {
-                setPaymentError(error.response.data.message);
+            const errorMessage = error.response?.data?.message || error.message;
+            
+            if (errorMessage.includes('Payment declined')) {
+                setPaymentError(errorMessage);
             } else {
-                setError(error.response?.data?.message || 'Error creating order. Please try again.');
+                setError(errorMessage || 'Error creating order. Please try again.');
             }
         } finally {
             setLoading(false);
@@ -178,90 +143,30 @@ const CheckoutPage = () => {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="bg-white p-6 rounded-lg shadow-sm">
                                 <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
-                                <div className="mb-4">
-                                    <label className="flex items-center space-x-2 mb-4">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.useDefaultAddress}
-                                            onChange={(e) => setFormData(prev => ({
-                                                ...prev,
-                                                useDefaultAddress: e.target.checked
-                                            }))}
-                                            className="form-checkbox"
-                                            disabled={!defaultAddress || defaultAddress === 'No address saved'}
-                                        />
-                                        <span>Use Default Address</span>
-                                    </label>
-
-                                    {formData.useDefaultAddress ? (
-                                        <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
-                                            <p className="font-medium text-gray-700">Default Address:</p>
-                                            <p className="mt-1 text-gray-600">{defaultAddress}</p>
-                                        </div>
-                                    ) : (
-                                        <textarea
-                                            name="alternateAddress"
-                                            value={formData.alternateAddress}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="w-full h-32 p-2 border rounded-md"
-                                            placeholder="Enter shipping address"
-                                        />
-                                    )}
-                                </div>
+                                <textarea
+                                    name="shippingAddress"
+                                    value={formData.shippingAddress}
+                                    onChange={handleInputChange}
+                                    required
+                                    className="w-full h-32 p-2 border rounded-md"
+                                    placeholder="Enter your shipping address"
+                                />
                             </div>
 
                             <div className="bg-white p-6 rounded-lg shadow-sm">
                                 <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
-                                {!defaultCard ? (
-                                    <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-                                        <p className="text-blue-800 mb-2">No credit card on file</p>
-                                        <p className="text-blue-600">Please add a credit card in your <Link to="/profile" className="text-blue-700 underline hover:text-blue-800">Account Settings</Link> before proceeding with checkout.</p>
-                                    </div>
-                                ) : (
-                                    <div className="mb-4">
-                                        <label className="flex items-center space-x-2 mb-4">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.useDefaultCard}
-                                                onChange={(e) => setFormData(prev => ({
-                                                    ...prev,
-                                                    useDefaultCard: e.target.checked
-                                                }))}
-                                                className="form-checkbox"
-                                                disabled={!defaultCard}
-                                            />
-                                            <span>Use Default Credit Card</span>
-                                        </label>
-
-                                        {formData.useDefaultCard ? (
-                                            <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
-                                                <p className="font-medium text-gray-700">Default Card:</p>
-                                                <p className="mt-1 text-gray-600">
-                                                    {defaultCard ? `Card ending in ${lastFourDigits}` : 'No card saved'}
-                                                </p>
-                                                {cardExpiry && (
-                                                    <p className="mt-1 text-gray-600">Expires: {cardExpiry}</p>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-4">
-                                                <input
-                                                    type="text"
-                                                    name="alternateCard"
-                                                    value={formData.alternateCard}
-                                                    onChange={handleInputChange}
-                                                    required
-                                                    className="w-full p-2 border rounded-md"
-                                                    placeholder="Enter credit card number"
-                                                    ref={creditCardInputRef}
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
+                                <input
+                                    type="text"
+                                    name="creditCard"
+                                    value={formData.creditCard}
+                                    onChange={handleInputChange}
+                                    required
+                                    className="w-full p-2 border rounded-md"
+                                    placeholder="Enter credit card number"
+                                    ref={creditCardInputRef}
+                                />
                                 {paymentError && (
-                                    <div className="text-red-500 mt-2 text-sm">
+                                    <div className="payment-error-message" style={{ color: 'red', marginTop: '5px', fontSize: '14px' }}>
                                         {paymentError}
                                     </div>
                                 )}

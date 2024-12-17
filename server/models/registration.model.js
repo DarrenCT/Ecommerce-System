@@ -3,11 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Credit Card Schema
 const creditCardSchema = new mongoose.Schema({
-    cardId: {
-        type: String,
-        required: true,
-        unique: true
-    },
     cardNumber: { type: String, required: true },
     expiryDate: { type: String, required: true },
     cvv: { type: String, required: true },

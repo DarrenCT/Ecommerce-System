@@ -12,7 +12,7 @@ router.post('/api/payments/validate', (req, res) => {
         // Increment global counter
         paymentAttempts++;
 
-        // Reject every second attempt
+        // Reject every third attempt
         if (paymentAttempts % 2 === 0) {
             return res.status(400).json({
                 success: false,

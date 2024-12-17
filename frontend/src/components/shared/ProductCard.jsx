@@ -2,15 +2,11 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useState } from 'react';
 import Toast from './Toast';
-import { useAuth } from '../../context/DevAuthContext';
-import { cartService } from '../../services/cartService'; 
 
 const ProductCard = ({ product }) => {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [toastDuration, setToastDuration] = useState(3000);
-    const [toastType, setToastType] = useState('success');
-    const { isAuthenticated, user } = useAuth();
 
     const isOutOfStock = product.quantity <= 0;
 
@@ -18,25 +14,30 @@ const ProductCard = ({ product }) => {
         if (isOutOfStock) {
             setToastMessage('Sorry, this item is out of stock');
             setToastDuration(2000);
-            setToastType('error');
             setShowToast(true);
             return;
         }
 
         try {
-            const userId = isAuthenticated ? user.userId : null;
-            const cart = await cartService.getOrCreateCart(userId);
-            await cartService.addToCart(cart.cartId, product._id, 1);
+            let cartId = localStorage.getItem('cartId');
+            if (!cartId) {
+                const response = await axios.post('/api/cart');
+                cartId = response.data.cartId;
+                localStorage.setItem('cartId', cartId);
+            }
+
+            await axios.post(`/api/cart/${cartId}/items`, {
+                productId: product._id,
+                quantity: 1
+            });
 
             setToastMessage('Item added to cart successfully!');
             setToastDuration(3000);
-            setToastType('success');
             setShowToast(true);
         } catch (error) {
             console.error('Error adding to cart:', error);
             setToastMessage('Error adding item to cart');
             setToastDuration(3000);
-            setToastType('error');
             setShowToast(true);
         }
     };
@@ -72,7 +73,6 @@ const ProductCard = ({ product }) => {
                 <Toast 
                     message={toastMessage}
                     duration={toastDuration}
-                    type={toastType}
                     onClose={() => setShowToast(false)}
                 />
             )}
