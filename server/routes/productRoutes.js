@@ -168,7 +168,22 @@ router.put('/api/products/:id/quantity', async (req, res) => {
 });
 
 
+//toggle between login 
+// Middleware to mock login state
+const loginState = { isLoggedIn: false }; // Initial state
 
+const mockLoginMiddleware = (req, res, next) => {
+  req.loginState = loginState;
+  next();
+};
+
+// Toggle login state
+router.post('/api/login/toggle', (req, res) => {
+  loginState.isLoggedIn = !loginState.isLoggedIn;
+  res.json({ isLoggedIn: loginState.isLoggedIn });
+});
+
+router.use(mockLoginMiddleware);
 
 
 export default router;
