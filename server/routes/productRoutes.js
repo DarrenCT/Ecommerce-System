@@ -110,6 +110,28 @@ router.get('/api/products', async (req, res) => {
   }
 });
 
+// Get out-of-stock products
+router.get('/api/products/out-of-stock', async (req, res) => {
+  try {
+    const products = await Product.find({ quantity: { $lte: 0 } })
+      .select('item_name price main_image brand node quantity');
+
+    const transformedProducts = products.map(product => ({
+      _id: product._id,
+      name: product.item_name[0]?.value || 'Unknown Product',
+      price: product.price,
+      image: product.main_image ? `data:image/jpeg;base64,${product.main_image.toString('base64')}` : null,
+      brand: product.brand[0]?.value || 'Unknown Brand',
+      quantity: product.quantity,
+      node: product.node || []
+    }));
+
+    res.json({ products: transformedProducts });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // Single product route MUST come last
 router.get('/api/products/:id', async (req, res) => {
   try {
@@ -166,9 +188,5 @@ router.put('/api/products/:id/quantity', async (req, res) => {
       res.status(500).json({ message: 'Error updating product quantity', error: error.message });
   }
 });
-
-
-
-
 
 export default router;
