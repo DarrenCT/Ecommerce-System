@@ -12,7 +12,6 @@ import {
     Tooltip,
     Legend
 } from 'chart.js';
-import { format, subDays } from 'date-fns';
 
 // Register ChartJS components
 ChartJS.register(
@@ -44,12 +43,18 @@ const AdminDashboard = () => {
         try {
             setLoading(true);
             const endDate = new Date();
-            const startDate = subDays(endDate, parseInt(timeRange));
+            const startDate = new Date();
+            startDate.setDate(endDate.getDate() - parseInt(timeRange));
+            
+            // Format dates in YYYY-MM-DD format
+            const formatDate = (date) => {
+                return date.toISOString().split('T')[0];
+            };
             
             const response = await axios.get('/api/orders/history', {
                 params: {
-                    startDate: format(startDate, 'yyyy-MM-dd'),
-                    endDate: format(endDate, 'yyyy-MM-dd')
+                    startDate: formatDate(startDate),
+                    endDate: formatDate(endDate)
                 }
             });
 
@@ -61,12 +66,13 @@ const AdminDashboard = () => {
             // Process daily sales
             const dailySalesMap = new Map();
             for (let d = 0; d < parseInt(timeRange); d++) {
-                const date = format(subDays(endDate, d), 'yyyy-MM-dd');
-                dailySalesMap.set(date, 0);
+                const date = new Date();
+                date.setDate(endDate.getDate() - d);
+                dailySalesMap.set(formatDate(date), 0);
             }
             
             orders.forEach(order => {
-                const date = format(new Date(order.createdAt), 'yyyy-MM-dd');
+                const date = new Date(order.createdAt).toISOString().split('T')[0];
                 if (dailySalesMap.has(date)) {
                     dailySalesMap.set(date, dailySalesMap.get(date) + order.totalAmount);
                 }
@@ -100,7 +106,10 @@ const AdminDashboard = () => {
     };
 
     const lineChartData = {
-        labels: salesData.dailySales.map(([date]) => format(new Date(date), 'MMM dd')),
+        labels: salesData.dailySales.map(([date]) => {
+            const dateParts = date.split('-');
+            return `${dateParts[1]}/${dateParts[2]}`;
+        }),
         datasets: [{
             label: 'Daily Sales ($)',
             data: salesData.dailySales.map(([, amount]) => amount),
