@@ -1,68 +1,57 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
+import NavBar from './components/shared/NavBar';
+import ProductCatalog from './components/pages/ProductCatalog';
+import CartPage from './components/pages/CartPage';
+import ProductDetailsPage from './components/pages/ProductDetailsPage';
+import { DevAuthProvider } from './context/DevAuthContext';
+import SearchResults from './components/pages/SearchResults';
+import RegistrationPage from './components/pages/registration.jsx';
+import SignInPage from './components/pages/sign_in.jsx';
+import MyAccount from './components/pages/myAccount.jsx';
+import CheckoutPage from './components/pages/CheckoutPage';
+import OrderConfirmationPage from './components/pages/OrderConfirmationPage';
+import UserManagement from './components/pages/admin/UserManagement';
+import CustomerDetails from './components/pages/admin/CustomerDetails';
 
-const App = () => {
-  const [products, setProducts] = useState([]);
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-
-  // Function to fetch products from the backend
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get('/api/products');
-      setProducts(response.data);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
-
-  // Fetch products when the component mounts
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  // Function to add a new product
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    try {
-      const newProduct = { name, price: Number(price) };
-      await axios.post('/api/products', newProduct);
-      fetchProducts(); // Refresh product list after adding a new product
-      setName('');
-      setPrice('');
-    } catch (error) {
-      console.error('Error adding product:', error);
-    }
-  };
+// General Layout Component
+const AppLayout = () => {
+  const location = useLocation();
 
   return (
-    <div>
-      <h1>Product List</h1>
-      <ul>
-        {products.map((product) => (
-          <li key={product._id}>
-            {product.name} - ${product.price}
-          </li>
-        ))}
-      </ul>
-
-      <h2>Add a New Product</h2>
-      <form onSubmit={handleAddProduct}>
-        <input
-          type="text"
-          placeholder="Product Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Product Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-        />
-        <button type="submit">Add Product</button>
-      </form>
+    <div className="min-h-screen bg-gray-50">
+      {['/register', '/sign_in'].includes(location.pathname) || <NavBar />}
+      <div className="flex">
+        <main className="flex-1">
+          <Outlet />
+        </main>
+      </div>
     </div>
+  );
+};
+
+// Main App Component
+const App = () => {
+  return (
+    <DevAuthProvider>
+      <Router>
+        <Routes>
+          {/* Layout for pages with NavBar and Sidebar */}
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<ProductCatalog />} />
+            <Route path="/register" element={<RegistrationPage />} />
+            <Route path="/sign_in" element={<SignInPage />} />
+            <Route path="/profile" element={<MyAccount />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/product/:id" element={<ProductDetailsPage />} />
+            <Route path="/search" element={<SearchResults />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+            <Route path="/admin/customers" element={<UserManagement />} />
+            <Route path="/admin/customers/:id" element={<CustomerDetails />} />
+          </Route>
+        </Routes>
+      </Router>
+    </DevAuthProvider>
   );
 };
 

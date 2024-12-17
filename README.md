@@ -34,7 +34,7 @@ Setup environment variables
 Start backend server
 - `npm run dev`
 ### 3. Frontend Setup
-- `cd ../client`
+- `cd ../frontend`
 
 Install all dependencies
 - `npm install`
@@ -59,3 +59,36 @@ Start frontend dev server
 - `npm run dev`
 
 Follow local link to test app
+
+## Getting Started with Docker for Development
+
+This guide will help you set up the development environment for our MERN app using Docker. Follow these steps to ensure a consistent environment across the team.
+
+### Prerequisites
+1. **Install Docker**  
+   Ensure Docker Desktop (or Docker Engine for Linux) is installed on your machine:
+   - [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+2. Checkout a branch with dockerfiles (`feature/add-docker` is a test branch for now)
+3. Build the docker image (only need for the first time, and if you made changes to docker related files)
+    - `docker compose up -d --build` 
+    - you should now see the following
+    - ![alt text](./img/image.png)
+    - click on the link 5173:5173 to open the app
+4. Start docker image (regular use)
+    - click on the first start arrow
+    - ![alt text](./img/image2.png)
+    - click on the link 5173:5173 to open the app
+5. Stop docker image (regular use)
+    - click on the stop button
+
+## Dataset Used
+@article{collins2022abo,
+  title={ABO: Dataset and Benchmarks for Real-World 3D Object Understanding},
+  author={Collins, Jasmine and Goel, Shubham and Deng, Kenan and Luthra, Achleshwar and
+          Xu, Leon and Gundogdu, Erhan and Zhang, Xi and Yago Vicente, Tomas F and
+          Dideriksen, Thomas and Arora, Himanshu and Guillaumin, Matthieu and
+          Malik, Jitendra},
+  journal={CVPR},
+  year={2022}
+}
