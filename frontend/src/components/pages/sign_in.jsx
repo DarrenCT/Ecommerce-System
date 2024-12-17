@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/DevAuthContext';
 
@@ -9,20 +8,21 @@ function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      const response = await axios.post('http://localhost:5000/sign_in', { email, password });
-      console.log('Login response:', response.data);
-      const userData = response.data.user;
-      login(userData);
+      await login(email, password);
       navigate('/');
     } catch (error) {
-      console.error('Error during login:', error);
-      setError(error.response?.data?.message || 'An error occurred during sign-in.');
+      setError(error.message || 'An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,12 +31,17 @@ function SignInPage() {
       <div className="max-w-4xl w-full space-y-12 bg-white p-16 rounded-xl shadow-md">
         <div>
           <h2 className="text-center text-5xl font-bold text-gray-900 mb-4">Sign in</h2>
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+              <p className="text-red-700">{error}</p>
+            </div>
+          )}
         </div>
-        <form className="mt-12 space-y-10" onSubmit={handleSubmit}>
-          <div className="space-y-8">
+        <form className="mt-12 space-y-8" onSubmit={handleSubmit}>
+          <div className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-xl font-medium text-gray-700">
-                Email address
+                Email
               </label>
               <input
                 id="email"
@@ -44,7 +49,8 @@ function SignInPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="name@company.com"
+                placeholder="Enter your email"
+                autoComplete="email"
                 className="mt-2 block w-full px-6 py-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-amazon-light focus:border-amazon-light text-xl"
               />
             </div>
@@ -58,7 +64,8 @@ function SignInPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="••••••••"
+                placeholder="Enter your password"
+                autoComplete="current-password"
                 className="mt-2 block w-full px-6 py-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-amazon-light focus:border-amazon-light text-xl"
               />
             </div>
@@ -87,14 +94,15 @@ function SignInPage() {
           <div>
             <button
               type="submit"
-              className="w-full flex justify-center py-4 px-6 border border-transparent rounded-lg shadow-md text-xl font-medium text-black bg-amazon-yellow hover:bg-amazon-orange focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amazon-light"
+              disabled={loading}
+              className={`w-full flex justify-center py-4 px-6 border border-transparent rounded-lg shadow-md text-xl font-medium text-black bg-amazon-yellow hover:bg-amazon-orange focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amazon-light ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              Sign in
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
         </form>
-        {error && <p className="mt-4 text-center text-lg text-red-600">{error}</p>}
-        {success && <p className="mt-4 text-center text-lg text-green-600">{success}</p>}
         <p className="mt-4 text-center text-lg text-gray-600">
           Not registered?{' '}
           <span

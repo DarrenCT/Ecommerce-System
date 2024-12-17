@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/DevAuthContext';
+import { cartService } from '../../services/cartService'; // Update to use named import
 
 /**
  * CartPage Component
@@ -14,36 +15,7 @@ const CartPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
-
-    /**
-     * Retrieves cartId from localStorage or creates a new cart
-     * @returns {Promise<string|null>} The cart ID or null if creation fails
-     */
-    const getCartId = async () => {
-        let cartId = localStorage.getItem('cartId');
-        if (!cartId) {
-            cartId = await createNewCart();
-        }
-        return cartId;
-    };
-
-    /**
-     * Creates a new cart on the server
-     * @returns {Promise<string|null>} The new cart ID or null if creation fails
-     */
-    const createNewCart = async () => {
-        try {
-            const response = await axios.post('/api/cart');
-            const cartId = response.data.cartId;
-            localStorage.setItem('cartId', cartId);
-            return cartId;
-        } catch (error) {
-            console.error('Error creating cart:', error);
-            setError('Error creating cart');
-            return null;
-        }
-    };
+    const { isAuthenticated, user } = useAuth(); // Update to include user
 
     /**
      * Fetches the current cart data from the server
@@ -51,13 +23,8 @@ const CartPage = () => {
     const fetchCart = async () => {
         try {
             setLoading(true);
-            const cartId = await getCartId();
-            if (!cartId) {
-                setError('Could not create or retrieve cart');
-                return;
-            }
-            const response = await axios.get(`/api/cart/${cartId}`);
-            setCart(response.data);
+            const cart = await cartService.getOrCreateCart();
+            setCart(cart);
         } catch (error) {
             console.error('Error fetching cart:', error);
             setError('Error fetching cart data');
@@ -73,10 +40,8 @@ const CartPage = () => {
      */
     const updateQuantity = async (productId, newQuantity) => {
         try {
-            const cartId = await getCartId();
-            await axios.put(`/api/cart/${cartId}/items/${productId}`, {
-                quantity: newQuantity
-            });
+            const cartId = localStorage.getItem('cartId');
+            await cartService.updateQuantity(cartId, productId, newQuantity);
             fetchCart(); // Refresh cart data
         } catch (error) {
             console.error('Error updating quantity:', error);
@@ -89,8 +54,8 @@ const CartPage = () => {
      */
     const removeItem = async (productId) => {
         try {
-            const cartId = await getCartId();
-            await axios.delete(`/api/cart/${cartId}/items/${productId}`);
+            const cartId = localStorage.getItem('cartId');
+            await cartService.removeItem(cartId, productId);
             fetchCart(); // Refresh cart data
         } catch (error) {
             console.error('Error removing item:', error);
@@ -100,7 +65,7 @@ const CartPage = () => {
     const handleCheckout = () => {
         if (!isAuthenticated) {
             // Show warning message
-            alert('Please log in to proceed with checkout');
+            alert('Please log in or sign up to proceed with checkout');
             return;
         }
         navigate('/checkout');

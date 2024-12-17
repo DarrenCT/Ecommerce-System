@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, User } from "lucide-react";
 import { useAuth } from '../../context/DevAuthContext';
+import { cartService } from '../../services/cartService';
 
 const NavBar = () => {
     const { user, isAuthenticated, logout } = useAuth();
@@ -15,6 +16,16 @@ const NavBar = () => {
         }
     };
 
+    const handleCartClick = async (e) => {
+        e.preventDefault();
+        try {
+            const userId = isAuthenticated ? user.userId : null;
+            const cart = await cartService.getOrCreateCart(userId);
+            navigate('/cart');
+        } catch (error) {
+            console.error('Error accessing cart:', error);
+        }
+    };
 
     const handleMyAccount = () => {
         if (isAuthenticated) {
@@ -57,13 +68,14 @@ const NavBar = () => {
                 </form>
 
                 <div className="flex items-center space-x-6">
-                    <Link
-                        to="/cart"
+                    <a
+                        href="/cart"
+                        onClick={handleCartClick}
                         className="flex items-center space-x-1 hover:text-amazon-yellow"
                     >
                         <ShoppingCart className="h-6 w-6" />
                         <span>Cart</span>
-                    </Link>
+                    </a>
                     <button
                         onClick={handleMyAccount}
                         className="flex items-center space-x-1 hover:text-amazon-yellow"

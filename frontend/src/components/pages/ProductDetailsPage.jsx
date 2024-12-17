@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Toast from '../shared/Toast';
+import { useAuth } from '../../context/DevAuthContext';
+import { cartService } from '../../services/cartService';
 
 const transformImageData = (imageData) => {
     if (!imageData) return 'https://via.placeholder.com/400';
@@ -18,6 +20,9 @@ const ProductDetailsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastType, setToastType] = useState('success');
+    const { isAuthenticated, user } = useAuth();
     const { id } = useParams();
 
     useEffect(() => {
@@ -39,22 +44,26 @@ const ProductDetailsPage = () => {
     }, [id]);
 
     const addToCart = async () => {
+        if (product.quantity <= 0) {
+            setToastMessage('Sorry, this item is out of stock');
+            setToastType('error');
+            setShowToast(true);
+            return;
+        }
+
         try {
-            let cartId = localStorage.getItem('cartId');
-            if (!cartId) {
-                const response = await axios.post('/api/cart');
-                cartId = response.data.cartId;
-                localStorage.setItem('cartId', cartId);
-            }
-
-            await axios.post(`/api/cart/${cartId}/items`, {
-                productId: product._id,
-                quantity: 1
-            });
-
+            const userId = isAuthenticated ? user.userId : null;
+            const cart = await cartService.getOrCreateCart(userId);
+            await cartService.addToCart(cart.cartId, product._id, 1);
+            
+            setToastMessage('Item added to cart successfully!');
+            setToastType('success');
             setShowToast(true);
         } catch (error) {
             console.error('Error adding to cart:', error);
+            setToastMessage('Error adding item to cart');
+            setToastType('error');
+            setShowToast(true);
         }
     };
 
@@ -123,8 +132,9 @@ const ProductDetailsPage = () => {
                 </div>
             </div>
             {showToast && (
-                <Toast 
-                    message="Item added to cart successfully!"
+                <Toast
+                    message={toastMessage}
+                    type={toastType}
                     onClose={() => setShowToast(false)}
                 />
             )}

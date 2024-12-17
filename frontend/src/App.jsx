@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import NavBar from './components/shared/NavBar';
-import Sidebar from './components/shared/Sidebar';
 import ProductCatalog from './components/pages/ProductCatalog';
 import CartPage from './components/pages/CartPage';
 import ProductDetailsPage from './components/pages/ProductDetailsPage';
@@ -17,19 +16,11 @@ import CustomerDetails from './components/pages/admin/CustomerDetails';
 // General Layout Component
 const AppLayout = () => {
   const location = useLocation();
-  const showGeneralSidebar =
-    location.pathname !== '/' &&
-    location.pathname !== '/search' &&
-    location.pathname !== '/checkout' &&
-    location.pathname !== '/cart' &&
-    !location.pathname.startsWith('/order-confirmation') &&
-    !['/register', '/sign_in'].includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {['/register', '/sign_in'].includes(location.pathname) || <NavBar />}
       <div className="flex">
-        {showGeneralSidebar && <Sidebar />}
         <main className="flex-1">
           <Outlet />
         </main>
