@@ -13,6 +13,29 @@ const creditCardSchema = new mongoose.Schema({
     cvv: { type: String, required: true },
 });
 
+//shipping address schema
+const shippingAddressSchema = new mongoose.Schema({
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    province: { type: String, required: true },
+    postalCode: { type: String, required: true },
+    country: { type: String, required: true },
+});
+
+//purchase history schema
+const purchaseHistorySchema = new mongoose.Schema({
+    orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
+    date: { type: Date, default: Date.now },
+    items: [
+        {
+            productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+            quantity: { type: Number, required: true },
+        },
+    ],
+    totalAmount: { type: Number, required: true }, // Total amount for the order
+});
+
+
 // User (Registration) Schema
 const registrationSchema = new mongoose.Schema({
     userId: {
@@ -41,6 +64,8 @@ const registrationSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
+    shippingAddresses: [shippingAddressSchema], 
+    purchaseHistory: [purchaseHistorySchema],
     creditCards: [creditCardSchema], // Array of Credit Card objects
     createdAt: {
         type: Date,
