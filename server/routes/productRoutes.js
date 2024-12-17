@@ -73,44 +73,41 @@ router.get('/api/products/search', async (req, res) => {
 
 // General products route
 router.get('/api/products', async (req, res) => {
-    try {
-        const products = await Product.find({})  // Add empty query object
-            .select('item_name quantity price')
-            .lean()  // Convert to plain JavaScript objects
-            .exec(); // Execute the query
+  try {
+    // Get total count of products
+    const totalProducts = await Product.countDocuments({});
+    
+    // Get 12 random products using aggregation pipeline
+    const products = await Product.aggregate([
+      { $sample: { size: 12 } },
+      { $project: {
+        item_name: 1,
+        price: 1,
+        main_image: 1,
+        brand: 1,
+        node: 1,
+        quantity: 1
+      }}
+    ]);
 
-        // Add console.log to debug the response
-        console.log('Server products response:', products);
-        
-        if (!Array.isArray(products)) {
-            throw new Error('Products query did not return an array');
-        }
+    const transformedProducts = products.map(product => ({
+      _id: product._id,
+      name: product.item_name[0]?.value || 'Unknown Product',
+      price: product.price,
+      image: product.main_image ? `data:image/jpeg;base64,${product.main_image.toString('base64')}` : null,
+      brand: product.brand[0]?.value || 'Unknown Brand',
+      quantity: product.quantity,
+      node: product.node || []
+    }));
 
-        res.json(products);
-    } catch (error) {
-        console.error('Error fetching products:', error);
-        res.status(500).json({ 
-            message: 'Error fetching products', 
-            error: error.message 
-        });
-    }
-});
-
-// Get all products with stock levels
-router.get('/api/products/stock', async (req, res) => {
-    try {
-        const products = await Product.find()
-            .select('item_name quantity price')
-            .sort({ quantity: 1 });  // Sort by quantity ascending
-
-        res.json(products);
-    } catch (error) {
-        console.error('Error fetching products:', error);
-        res.status(500).json({ 
-            message: 'Error fetching products', 
-            error: error.message 
-        });
-    }
+    res.json({
+      count: transformedProducts.length,
+      products: transformedProducts
+    });
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
 });
 
 // Single product route MUST come last
@@ -169,5 +166,9 @@ router.put('/api/products/:id/quantity', async (req, res) => {
       res.status(500).json({ message: 'Error updating product quantity', error: error.message });
   }
 });
+
+
+
+
 
 export default router;
