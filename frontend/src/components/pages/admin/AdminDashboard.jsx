@@ -31,13 +31,12 @@ const AdminDashboard = () => {
         dailySales: [],
         topProducts: []
     });
-    const [stockData, setStockData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [timeRange, setTimeRange] = useState('7'); // days
 
     useEffect(() => {
-        Promise.all([fetchSalesData(), fetchStockData()]);
+        fetchSalesData();
     }, [timeRange]);
 
     const fetchSalesData = async () => {
@@ -106,30 +105,6 @@ const AdminDashboard = () => {
         }
     };
 
-    const fetchStockData = async () => {
-        try {
-            const response = await axios.get('/api/products');
-            const products = Array.isArray(response.data) ? response.data : [];
-            
-            // Add console.log to debug the response
-            console.log('Products response:', response.data);
-            
-            // Sort products by quantity and get the 10 products with lowest stock
-            const sortedProducts = [...products]
-                .sort((a, b) => a.quantity - b.quantity)
-                .slice(0, 10)
-                .map(product => ({
-                    name: product.item_name[0].value,
-                    quantity: product.quantity
-                }));
-            
-            setStockData(sortedProducts);
-        } catch (err) {
-            setError('Failed to fetch stock data');
-            console.error('Error fetching stock data:', err);
-        }
-    };
-
     const lineChartData = {
         labels: salesData.dailySales.map(([date]) => {
             const dateParts = date.split('-');
@@ -149,17 +124,6 @@ const AdminDashboard = () => {
             label: 'Sales Amount ($)',
             data: salesData.topProducts.map(([, amount]) => amount),
             backgroundColor: 'rgba(54, 162, 235, 0.5)'
-        }]
-    };
-
-    const stockChartData = {
-        labels: stockData.map(item => item.name),
-        datasets: [{
-            label: 'Stock Level',
-            data: stockData.map(item => item.quantity),
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-            borderColor: 'rgb(255, 99, 132)',
-            borderWidth: 1
         }]
     };
 
@@ -208,26 +172,6 @@ const AdminDashboard = () => {
                         }
                     }} />
                 </div>
-
-                <div className="chart-container">
-                    <h2>Low Stock Products</h2>
-                    <Bar data={stockChartData} options={{
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'top' },
-                            title: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Quantity in Stock'
-                                }
-                            }
-                        }
-                    }} />
-                </div>
             </div>
 
             <style>{`
@@ -254,8 +198,9 @@ const AdminDashboard = () => {
 
                 .charts-grid {
                     display: grid;
-                    grid-template-columns: repeat(2, 1fr);
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
                     gap: 20px;
+                    margin-top: 20px;
                 }
 
                 .chart-container {
@@ -263,33 +208,12 @@ const AdminDashboard = () => {
                     padding: 20px;
                     border-radius: 8px;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    min-height: 400px;
-                    display: flex;
-                    flex-direction: column;
                 }
 
-                .chart-container:last-child {
-                    margin-left: auto;
-                    margin-right: auto;
-                    grid-column: 1 / 2;
-                    width: calc(100% - 10px);
-                }
-
-                .chart-container h2 {
-                    margin-top: 0;
-                    margin-bottom: 20px;
-                }
-
-                @media (max-width: 768px) {
-                    .charts-grid {
-                        grid-template-columns: 1fr;
-                    }
-                    
-                    .chart-container:last-child {
-                        grid-column: auto;
-                        width: 100%;
-                        margin: 0;
-                    }
+                select {
+                    padding: 8px;
+                    border-radius: 4px;
+                    border: 1px solid #ddd;
                 }
             `}</style>
         </div>
