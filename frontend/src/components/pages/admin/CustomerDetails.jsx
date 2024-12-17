@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import CreditCard from '../creditCard';
 
 const CustomerDetails = () => {
     const { id } = useParams();
@@ -8,6 +9,7 @@ const CustomerDetails = () => {
     const [customer, setCustomer] = useState(null);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [isCreditCardModalOpen, setIsCreditCardModalOpen] = useState(false);
 
     // Fetch customer details and orders on page load
     useEffect(() => {
@@ -136,12 +138,19 @@ const CustomerDetails = () => {
                                 />
                             </div>
                         </div>
-                        <div className="flex justify-end mt-6">
+                        <div className="flex justify-between items-center mt-6">
+                            <button
+                                type="button"
+                                onClick={() => setIsCreditCardModalOpen(true)}
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                            >
+                                Manage Payment Methods
+                            </button>
                             <button
                                 type="submit"
-                                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200"
+                                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200"
                             >
-                                Update Customer
+                                Save Changes
                             </button>
                         </div>
                     </form>
@@ -206,6 +215,10 @@ const CustomerDetails = () => {
                     </div>
                 )}
             </div>
+            <CreditCard 
+                isOpen={isCreditCardModalOpen} 
+                onClose={() => setIsCreditCardModalOpen(false)} 
+            />
         </div>
     );
 };
