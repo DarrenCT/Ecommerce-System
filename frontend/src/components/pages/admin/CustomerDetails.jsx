@@ -3,27 +3,60 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const CustomerDetails = () => {
-    const { id } = useParams(); // Get customer ID from the URL
+    const { id } = useParams();
     const navigate = useNavigate();
     const [customer, setCustomer] = useState(null);
+    const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Fetch customer details on page load
+    // Fetch customer details and orders on page load
     useEffect(() => {
-        const fetchCustomer = async () => {
+        const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`/api/customers/${id}`);
-                setCustomer(response.data);
+                const [customerResponse, ordersResponse] = await Promise.all([
+                    axios.get(`/api/customers/${id}`),
+                    axios.get(`/api/orders/history?customerId=${id}`)
+                ]);
+                setCustomer(customerResponse.data);
+                setOrders(ordersResponse.data);
             } catch (error) {
-                console.error('Error fetching customer details:', error);
-                alert('Failed to fetch customer details');
+                console.error('Error fetching data:', error);
+                alert('Failed to fetch customer data');
             }
             setLoading(false);
         };
 
-        fetchCustomer();
+        fetchData();
     }, [id]);
+
+    // Helper function to format dates
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
+    };
+
+    // Helper function to format currency
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+        }).format(amount);
+    };
+
+    // Helper function to get value from multilingual field
+    const getMultilingualValue = (field) => {
+        if (!field) return '';
+        if (typeof field === 'string') return field;
+        if (Array.isArray(field)) {
+            const defaultLang = field.find(f => f.language_tag === 'en') || field[0];
+            return defaultLang?.value || '';
+        }
+        return field.value || '';
+    };
 
     // Handle updates to customer information
     const handleUpdate = async (e) => {
@@ -118,6 +151,61 @@ const CustomerDetails = () => {
                     <p className="text-gray-600">No customer data found.</p>
                 </div>
             )}
+            
+            {/* Order History Section */}
+            <div className="bg-white rounded-lg shadow-lg p-6 mt-8">
+                <h2 className="text-xl font-semibold mb-4">Order History</h2>
+                {orders.length === 0 ? (
+                    <p className="text-gray-600">No orders found for this customer.</p>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full bg-white">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Date</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                {orders.map((order) => (
+                                    <tr key={order._id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {formatDate(order.createdAt)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
+                                            {order._id}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-500">
+                                            <ul className="list-disc list-inside">
+                                                {order.items.map((item, index) => (
+                                                    <li key={index}>
+                                                        {getMultilingualValue(item.product.item_name)} × {item.quantity}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {formatCurrency(order.totalAmount)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                                order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-gray-100 text-gray-800'
+                                            }`}>
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
