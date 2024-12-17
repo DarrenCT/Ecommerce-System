@@ -11,7 +11,7 @@ const AdminNavBar = () => {
                     Admin Panel
                 </Link>
                 <div className="flex items-center space-x-4">
-                    <span>Welcome, {user?.name || 'Admin'}</span>
+                    <span>Welcome, {'Admin'}</span>
                     <Link to="/" className="hover:text-amazon-yellow">
                         View Store
                     </Link>
