@@ -1,0 +1,98 @@
+@startuml E-commerce MongoDB Schema
+
+' MongoDB Collections
+package "E-commerce Database" {
+    class "users" as users {
+        + _id: ObjectId
+        + userId: String
+        + email: String
+        + password: String
+        + name: String
+        + phoneNumber: String
+        + address: String
+        + shippingAddresses: Array [
+            street: String
+            city: String
+            province: String
+            postalCode: String
+            country: String
+        ]
+        + purchaseHistory: Array [
+            orderId: ObjectId
+            date: Date
+            items: Array [
+                productId: ObjectId
+                quantity: Number
+            ]
+            totalAmount: Number
+        ]
+        + creditCards: Array [
+            cardId: String
+            cardNumber: String
+            expiryDate: String
+            cvv: String
+        ]
+        + createdAt: Date
+    }
+
+    class "products" as products {
+        + _id: ObjectId
+        + item_id: String
+        + item_name: Array [
+            language_tag: String
+            value: String
+        ]
+        + price: Number
+        + brand: Array [
+            language_tag: String
+            value: String
+        ]
+        + main_image: Buffer
+        + quantity: Number
+        + node: Array [
+            node_id: Number
+            node_name: String
+        ]
+    }
+
+    class "carts" as carts {
+        + _id: ObjectId
+        + cartId: String
+        + userId: String
+        + items: Array [
+            product: ObjectId
+            quantity: Number
+        ]
+        + totalAmount: Number
+        + createdAt: Date
+        + updatedAt: Date
+    }
+
+    class "orders" as orders {
+        + _id: ObjectId
+        + userId: String
+        + cartId: String
+        + items: Array [
+            product: ObjectId
+            quantity: Number
+            price: Number
+        ]
+        + totalAmount: Number
+        + shippingAddress: String
+        + billingAddress: String
+        + createdAt: Date
+        + updatedAt: Date
+    }
+}
+
+' Relationships
+users -- orders : userId
+users -- carts : userId
+orders -- products : items.product
+carts -- products : items.product
+
+' note "MongoDB NoSQL Schema\nCollections use embedded documents\nfor one-to-many relationships" as N1
+
+' note "References between collections\nuse ObjectId for relationships\ninstead of traditional foreign keys" as N2
+
+@enduml

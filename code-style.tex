@@ -1,0 +1,12 @@
+\usepackage{fancyvrb}
+\usepackage{xcolor}
+\definecolor{codecolor}{rgb}{0.95,0.95,0.95}
+\usepackage{mdframed}
+
+\surroundwithmdframed[
+  hidealllines=true,
+  backgroundcolor=codecolor
+]{verbatim}
+
+\let\oldtexttt\texttt
+\renewcommand{\texttt}[1]{\colorbox{codecolor}{\oldtexttt{#1}}}

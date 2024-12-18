@@ -1,0 +1,78 @@
+@startuml E-commerce System Architecture
+
+!define RECTANGLE class
+
+skinparam componentStyle rectangle
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+package "Frontend (React + Vite)" {
+    [Customer UI] as customerUI
+    [Admin Dashboard] as adminUI
+    
+    package "Core Components" {
+        [Product Catalog] as catalog
+        [Shopping Cart] as cart
+        [User Account] as account
+        [Checkout] as checkout
+    }
+    
+    package "Service Layer" {
+        [API Client] as apiClient
+        [Auth Service] as authClient
+    }
+}
+
+package "Backend (Express.js)" {
+    [API] as api
+    
+    package "Route Controllers" {
+        [Product Routes] as productAPI
+        [Cart Routes] as cartAPI
+        [Order Routes] as orderAPI
+        [Auth Routes] as authAPI
+        [User Routes] as userAPI
+        [Payment Routes] as paymentAPI
+    }
+    
+    package "Auth Middleware" {
+        [Authentication] as auth
+    }
+}
+
+database "MongoDB" {
+    [Products] as productsDB
+    [Users] as usersDB
+    [Orders] as ordersDB
+    [Carts] as cartsDB
+}
+
+' Frontend interactions
+customerUI --> apiClient
+adminUI --> apiClient
+catalog --> apiClient
+cart --> apiClient
+account --> apiClient
+checkout --> apiClient
+apiClient --> authClient
+
+' Backend interactions
+apiClient --> api
+api --> auth
+auth --> productAPI
+auth --> cartAPI
+auth --> orderAPI
+auth --> authAPI
+auth --> userAPI
+auth --> paymentAPI
+
+' Database interactions
+productAPI --> productsDB
+cartAPI --> cartsDB
+orderAPI --> ordersDB
+authAPI --> usersDB
+userAPI --> usersDB
+
+@enduml
