@@ -133,14 +133,94 @@ Implemented through Mongoose models, providing a clean separation between busine
 ### 3.3 Design Decisions and Trade-offs
 
 #### 3.3.1 Database Schema Design
-- **Decision**: Used MongoDB with Mongoose
+- **Decision**: Used MongoDB with Mongoose ODM (Object Document Mapper)
+
+- **Schema Implementation**:
+  1. **Product Schema** (from `product.model.js`):
+     ```javascript
+     {
+       item_id: { type: String, required: true },
+       item_name: [{
+         language_tag: String,
+         value: String
+       }],
+       price: { type: Number, required: true },
+       brand: [{
+         language_tag: String,
+         value: String
+       }],
+       main_image: { type: Buffer },
+       quantity: { type: Number, required: true, default: 100 },
+       node: [{
+         node_id: Number,
+         node_name: String
+       }]
+     }
+     ```
+
+  2. **Order Schema** (from `order.model.js`):
+     ```javascript
+     {
+       userId: { type: String, required: true },
+       cartId: { type: String, required: true },
+       items: [{
+         product: {
+           type: mongoose.Schema.Types.ObjectId,
+           ref: 'Product',
+           required: true
+         },
+         quantity: { type: Number, required: true },
+         price: { type: Number, required: true }
+       }],
+       totalAmount: { type: Number, required: true },
+       shippingAddress: { type: String, required: true },
+       billingAddress: { type: String, required: true }
+     }
+     ```
+
 - **Benefits**:
-  - Flexible schema for varying product attributes
-  - Easy scaling for large product catalogs
-  - Rich query API for complex searches
-- **Trade-offs**:
-  - Eventually consistent data model
-  - Complex transaction handling
+  1. **Flexible Schema**:
+     - Supports multilingual product names and descriptions through arrays of language-tagged values
+     - Hierarchical categorization through node structure
+     - Binary image storage capability
+     - Extensible product attributes
+
+  2. **Scalability**:
+     - Document-based structure ideal for product catalog
+     - Efficient querying of complete product information
+     - Built-in support for data replication
+     - No complex joins needed for basic operations
+
+  3. **Rich Query API**:
+     - Product search by name or category
+     - Inventory management
+     - Order tracking and history
+     - Shopping cart operations
+
+- **Trade-offs and Challenges**:
+  1. **Data Consistency**:
+     - Challenge: Maintaining accurate inventory during concurrent purchases
+     - Solution: Using Mongoose's built-in versioning and atomic updates
+
+  2. **Data Relationships**:
+     - Challenge: Managing product references in orders and carts
+     - Solution: Implemented references using Mongoose's ObjectId and ref system
+     - Example: Order items reference products using `mongoose.Schema.Types.ObjectId`
+
+  3. **Query Performance**:
+     - Challenge: Efficient retrieval of product data with images
+     - Solution: Implemented selective field projection and pagination
+
+- **Performance Optimizations**:
+  1. **Query Optimization**:
+     - Selective field projection in product queries
+     - Pagination for product listings
+     - Efficient cart and order lookups using cartId
+
+  2. **Data Modeling**:
+     - Embedded arrays for language-specific content
+     - Referenced products in orders for data consistency
+     - Structured node system for category management
 
 #### 3.3.2 Authentication Design
 - **Decision**: JWT-based authentication
@@ -152,13 +232,61 @@ Implemented through Mongoose models, providing a clean separation between busine
   - Need for secure token storage
 
 #### 3.3.3 API Design
-- **Decision**: RESTful architecture
+- **Decision**: RESTful architecture with Express.js
+- **Implementation Details**:
+  - Resource-Based Endpoints:
+    ```
+    GET    /api/products         # List products
+    GET    /api/products/:id     # Get single product
+    GET    /api/cart/:cartId     # Get cart
+    POST   /api/cart/:cartId/items  # Add to cart
+    PUT    /api/cart/:cartId/items/:productId  # Update cart item
+    DELETE /api/cart/:cartId     # Delete cart
+    ```
+  - HTTP Method Semantics:
+    - GET: Read-only operations (products, cart state)
+    - POST: Create new resources (orders, cart items)
+    - PUT: Update existing resources (cart quantities)
+    - DELETE: Remove resources (cart items)
+
 - **Benefits**:
-  - Clear resource hierarchy
-  - Standard HTTP methods for operations
-- **Trade-offs**:
-  - Multiple requests for complex operations
-  - Overhead in data transformation
+  - Clear resource hierarchy and relationships
+  - Standard HTTP methods for CRUD operations
+  - Stateless nature improves scalability
+  - Self-documenting API structure
+  - Cacheable responses for GET requests
+
+- **Trade-offs and Challenges**:
+  1. **Multiple Requests for Complex Operations**:
+     - Example: Checkout process requires multiple calls:
+       1. Validate cart items
+       2. Check product inventory
+       3. Create order
+       4. Update inventory
+     - Solution: Implemented transaction-like behavior in order creation endpoint
+
+  2. **Data Transformation Overhead**:
+     - MongoDB documents need transformation for client consumption
+     - Example: Product images converted to base64
+     - Solution: Implemented response transformation middleware
+
+  3. **N+1 Query Problem**:
+     - Cart endpoints need to fetch related product data
+     - Solution: Used Mongoose population to optimize queries:
+       ```javascript
+       cart.populate('items.product', 'item_name price main_image quantity')
+       ```
+
+  4. **State Management**:
+     - RESTful APIs are stateless by design
+     - Challenge with shopping cart persistence
+     - Solution: Implemented cart ID system for both authenticated and guest users
+
+- **Performance Optimizations**:
+  - Implemented query pagination for product listings
+  - Used projection to limit returned fields
+  - Cached frequently accessed product data
+  - Optimized database queries with proper indexing
 
 ### 3.4 Data Flow and State Management
 
@@ -172,6 +300,32 @@ Implemented through Mongoose models, providing a clean separation between busine
 - Controller logic for business rules
 - Model layer for data persistence
 - Response transformation for client consumption
+
+### 3.5 UML Diagrams
+
+#### 3.5.1 Class Diagram
+The system's class structure is illustrated in the following diagram:
+
+![Class Diagram](out/ClassDiagram.png)
+
+This diagram shows the main components of the system and their relationships, including:
+- Core models (User, Product, Order, Cart)
+- Supporting models (CartItem, OrderItem, etc.)
+- Relationships between components
+- Field constraints and data types
+
+#### 3.5.2 Database Schema
+The MongoDB database schema is illustrated in the following diagram:
+
+![Database Schema](out/DatabaseSchema.png)
+
+This diagram illustrates the NoSQL database structure, including:
+- Collection structures
+- Embedded documents
+- References between collections
+- Field types and relationships
+
+These diagrams provide a comprehensive view of both the object-oriented design and the underlying database structure of our e-commerce system.
 
 ## 4. Advanced and Distinguished Features
 ### 4.1. Security Features

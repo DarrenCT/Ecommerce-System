@@ -1,0 +1,117 @@
+@startuml E-commerce System Class Diagram
+
+' Models based on actual MongoDB Schemas
+class User {
+  -userId: String {unique, default: uuid}
+  -email: String {required, unique}
+  -password: String {required}
+  -name: String {required}
+  -phoneNumber: String
+  -address: String
+  -shippingAddresses: ShippingAddress[]
+  -purchaseHistory: PurchaseHistory[]
+  -creditCards: CreditCard[]
+  -createdAt: Date {default: now}
+}
+
+class Product {
+  -item_id: String {required}
+  -item_name: MultilingualField[]
+  -price: Number {required}
+  -brand: MultilingualField[]
+  -main_image: Buffer
+  -quantity: Number {required, default: 100}
+  -node: CategoryNode[]
+}
+
+class Order {
+  -userId: String {required}
+  -cartId: String {required}
+  -items: OrderItem[]
+  -totalAmount: Number {required}
+  -shippingAddress: String {required}
+  -billingAddress: String {required}
+  -timestamps: Boolean
+}
+
+class Cart {
+  -cartId: String {required, unique}
+  -userId: String {nullable}
+  -items: CartItem[]
+  -totalAmount: Number {default: 0}
+  -timestamps: Boolean
+  +calculateTotalAmount(): Promise<Number>
+}
+
+class CartItem {
+  -product: ObjectId {ref: Product}
+  -quantity: Number {required, min: 1}
+}
+
+class OrderItem {
+  -product: ObjectId {ref: Product}
+  -quantity: Number {required}
+  -price: Number {required}
+}
+
+class CreditCard {
+  -cardId: String {required, unique}
+  -cardNumber: String {required}
+  -expiryDate: String {required}
+  -cvv: String {required}
+}
+
+class ShippingAddress {
+  -street: String {required}
+  -city: String {required}
+  -province: String {required}
+  -postalCode: String {required}
+  -country: String {required}
+}
+
+class PurchaseHistory {
+  -orderId: ObjectId {ref: Order}
+  -date: Date {default: now}
+  -items: PurchaseItem[]
+  -totalAmount: Number {required}
+}
+
+class PurchaseItem {
+  -productId: ObjectId {ref: Product}
+  -quantity: Number {required}
+}
+
+class CategoryNode {
+  -node_id: Number
+  -node_name: String
+}
+
+class MultilingualField {
+  -language_tag: String
+  -value: String
+}
+
+' Relationships based on MongoDB Schema References
+User "1" -- "*" ShippingAddress
+User "1" -- "*" CreditCard
+User "1" -- "*" PurchaseHistory
+User "1" -- "*" Order
+User "1" -- "0..1" Cart
+
+Cart "1" -- "*" CartItem
+CartItem "*" -- "1" Product
+
+Order "1" -- "*" OrderItem
+OrderItem "*" -- "1" Product
+
+Product "1" -- "*" MultilingualField : name
+Product "1" -- "*" MultilingualField : brand
+Product "1" -- "*" CategoryNode : categories
+
+PurchaseHistory "*" -- "1" Order
+PurchaseHistory "1" -- "*" PurchaseItem
+PurchaseItem "*" -- "1" Product
+
+' note "All models use MongoDB Schema\nTimestamps enabled where noted" as N1
+note "MultilingualField is used to support\nmultilingual product data from the original dataset" as N2
+@enduml
