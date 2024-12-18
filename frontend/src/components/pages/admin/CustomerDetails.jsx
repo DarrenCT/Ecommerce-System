@@ -70,9 +70,17 @@ const CustomerDetails = () => {
             address: e.target.address.value,
         };
 
+        // Only include password if it's provided
+        const password = e.target.password.value;
+        if (password) {
+            updatedData.password = password;
+        }
+
         try {
             await axios.put(`/api/customers/${id}`, updatedData);
             alert('Customer information updated successfully');
+            // Clear password field after successful update
+            e.target.password.value = '';
             navigate('/users'); // Redirect back to user management page
         } catch (error) {
             console.error('Error updating customer:', error);
@@ -99,7 +107,7 @@ const CustomerDetails = () => {
             </div>
             {customer ? (
                 <div className="bg-white rounded-lg shadow-lg p-6">
-                    <form onSubmit={handleUpdate} className="space-y-6">
+                    <form onSubmit={handleUpdate} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
@@ -134,6 +142,24 @@ const CustomerDetails = () => {
                                     type="text"
                                     name="address"
                                     defaultValue={customer.address || ''}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={customer.password || ''}
+                                    className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    placeholder="Enter new password to update"
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                 />
                             </div>
