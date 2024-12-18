@@ -306,7 +306,7 @@ Implemented through Mongoose models, providing a clean separation between busine
 #### 3.5.1 Class Diagram
 The system's class structure is illustrated in the following diagram:
 
-![Class Diagram](out/ClassDiagram.png)
+![Class Diagram](./out/ClassDiagram/E-commerce%20System%20Class%20Diagram.png)
 
 This diagram shows the main components of the system and their relationships, including:
 - Core models (User, Product, Order, Cart)
@@ -317,7 +317,7 @@ This diagram shows the main components of the system and their relationships, in
 #### 3.5.2 Database Schema
 The MongoDB database schema is illustrated in the following diagram:
 
-![Database Schema](out/DatabaseSchema.png)
+![Database Schema](./out/DataBaseSchema/E-commerce%20MongoDB%20Schema.png)
 
 This diagram illustrates the NoSQL database structure, including:
 - Collection structures
