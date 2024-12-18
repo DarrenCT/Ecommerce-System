@@ -49,6 +49,9 @@ docker ps
 ### 6. Test the Application
 Open a browser and go to:
    - Frontend: http://localhost:5173
+   - Admin Panel: http://localhost:5173/admin.html
+        - Note: The only admin entry point is `/admin.html`, refreshing on other admin pages will result in a 404 error. 
+        - **Navigate only using the sidebar buttons.**   
 
 
 ### 7. Cleanup 
@@ -89,7 +92,9 @@ This will:
 - Build both frontend and backend containers
 - Start the frontend on http://localhost:5173
 - Start the backend on http://localhost:5000
-- Set up a Docker network for container communication
+- Access the admin panel on http://localhost:5173/admin.html
+    - The only admin entry point is `/admin.html`, refreshing on other admin pages will result in a 404 error. 
+    - **Navigate only using the sidebar buttons.**
 - Enable hot-reload for both frontend and backend development
 
 4. View logs (optional)
