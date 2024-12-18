@@ -1,0 +1,86 @@
+@startuml User Account Management Use Cases
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam usecaseStyle roundedBox
+
+left to right direction
+
+actor Customer as customer
+actor "Admin" as admin
+
+rectangle "User Account Management System" {
+    package "Account Operations" {
+        usecase "Register Account" as register
+        usecase "Sign In" as signin
+        usecase "View Account Details" as viewAccount
+        usecase "Update Profile" as updateProfile
+        usecase "Change Password" as changePassword
+        usecase "View Order History" as orderHistory
+        usecase "Manage Addresses" as addresses
+    }
+
+    package "Admin Operations" {
+        usecase "View User Accounts" as viewUsers
+        usecase "Manage User Status" as manageStatus
+        usecase "View User Orders" as viewOrders
+        usecase "Reset User Password" as resetPassword
+    }
+
+    package "Authentication" {
+        usecase "Verify Credentials" as verify
+        usecase "Generate Token" as token
+        usecase "Validate Session" as session
+    }
+}
+
+' Customer interactions
+customer --> register
+customer --> signin
+customer --> viewAccount
+customer --> updateProfile
+customer --> changePassword
+customer --> orderHistory
+customer --> addresses
+
+' Admin interactions
+admin --> viewUsers
+admin --> manageStatus
+admin --> viewOrders
+admin --> resetPassword
+
+' Include relationships
+signin ..> verify : <<include>>
+signin ..> token : <<include>>
+register ..> token : <<include>>
+viewAccount ..> session : <<include>>
+updateProfile ..> session : <<include>>
+orderHistory ..> session : <<include>>
+
+' Admin includes
+viewUsers ..> session : <<include>>
+manageStatus ..> session : <<include>>
+viewOrders ..> session : <<include>>
+resetPassword ..> session : <<include>>
+
+' Notes
+' note right of register
+'   Collects user information:
+'   - Email
+'   - Password
+'   - Name
+'   - Phone
+'   - Address
+' end note
+
+' note right of signin
+'   Authenticates user and
+'   provides access token
+' end note
+
+' note right of session
+'   Validates user's
+'   authentication status
+' end note
+
+@enduml

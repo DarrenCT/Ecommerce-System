@@ -1,0 +1,65 @@
+@startuml Order Processing Use Cases
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam usecaseStyle roundedBox
+
+left to right direction
+
+actor Customer as customer
+actor "Admin" as admin
+
+rectangle "Order Processing System" {
+    package "Shopping Cart" {
+        usecase "View Cart" as viewCart
+        usecase "Update Quantities" as updateCart
+        usecase "Remove Items" as removeItems
+    }
+
+    package "Checkout Process" {
+        usecase "Initiate Checkout" as checkout
+        usecase "Select Shipping Address" as shipping
+        usecase "Select Payment Method" as payment
+        usecase "Place Order" as placeOrder
+        usecase "View Order Confirmation" as confirmation
+    }
+
+    package "Order Management" {
+        usecase "View Order History" as orderHistory
+    }
+
+    package "Admin Order Processing" {
+        usecase "View All Orders" as viewOrders
+    }
+
+    package "Inventory Control" {
+        usecase "Check Stock" as checkStock
+        usecase "Update Inventory" as updateInventory
+    }
+}
+
+' Customer interactions
+customer --> viewCart
+customer --> updateCart
+customer --> removeItems
+customer --> checkout
+customer --> shipping
+customer --> payment
+customer --> placeOrder
+customer --> confirmation
+customer --> orderHistory
+
+' Admin interactions
+admin --> viewOrders
+admin --> updateInventory
+
+' Include relationships
+checkout ..> viewCart : <<include>>
+placeOrder ..> checkStock : <<include>>
+placeOrder ..> shipping : <<include>>
+placeOrder ..> payment : <<include>>
+
+' Extend relationships
+checkout .> payment : <<extend>>
+
+@enduml

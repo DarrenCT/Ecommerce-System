@@ -1,0 +1,65 @@
+@startuml Product Browsing Use Cases
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam usecaseStyle roundedBox
+
+left to right direction
+
+actor Customer as customer
+actor "Admin" as admin
+
+rectangle "Product Browsing System" {
+    package "Product Management" {
+        usecase "Browse Product Catalog" as browse
+        usecase "Search Products" as search
+        usecase "Filter by Category" as filter
+        usecase "Sort Products" as sort
+        usecase "View Product Details" as details
+        usecase "Add to Cart" as addCart
+    }
+
+    package "Admin Functions" {
+        usecase "Manage Products" as manage
+        usecase "Update Inventory" as inventory
+    }
+}
+
+' Customer interactions
+customer --> browse
+customer --> search
+customer --> filter
+customer --> sort
+customer --> details
+customer --> addCart
+
+' Admin interactions
+admin --> manage
+admin --> inventory
+
+' Include relationships
+browse ..> filter : <<include>>
+browse ..> sort : <<include>>
+search ..> filter : <<include>>
+manage ..> inventory : <<include>>
+
+' Extend relationships
+details .> addCart : <<extend>>
+
+' Notes
+' note right of browse
+'   Displays paginated product grid
+'   with basic product information
+' end note
+
+' note right of search
+'   Supports searching by name,
+'   brand, and description
+' end note
+
+' note right of filter
+'   Filters products by category
+'   and other attributes
+' end note
+
+@enduml
