@@ -114,6 +114,18 @@ docker compose down
 - Ensure ports 5173 and 5000 are not in use by other applications
 - If you modify dependencies (package.json), rebuild containers: `docker compose up --build`
 
+## Contribution
+We follow the Git Flow workflow to manage development and ensure a structured process for feature development and releases. Here's how you can contribute to the project:
+
+### Git Flow Branch Naming Convention:
+
+- `main`: Holds the production-ready code.
+- `develop`: Integrates all completed features and serves as the staging branch for upcoming releases.
+- Feature branches: `feature/[feature-name]` – Used for developing individual features.
+- Bugfix branches: `bugfix/[issue-name]` – For fixing bugs found in the develop branch.
+- Hotfix branches: `hotfix/[issue-name]` – For critical fixes to the main branch.
+- Release branches: `release/[version-number]` – Prepares for the next production release.
+
 ## Dataset Used
 @article{collins2022abo,
   title={ABO: Dataset and Benchmarks for Real-World 3D Object Understanding},
