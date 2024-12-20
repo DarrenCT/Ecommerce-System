@@ -1,10 +1,13 @@
 # E-Commerce System
 
 ## Quick Links
-- [Run Docker Images Locally](#step-by-step-guide-to-run-the-e-commerce-project-docker-images-locally)
-- [Run Code Locally](#run-code-locally)
-    - **add provided `.env` on Eclass to root directory after cloning repo and skip step 2**
-    - If you don't see the `.env` file after downloading from eclass, make sure hidden files are enabled in your file explorer.
+- [Run DockerHub Images Locally](#step-by-step-guide-to-run-the-e-commerce-project-docker-images-locally)
+- [Run Code Locally with Docker](#run-code-locally)
+- [Run Code Locally with npm](#run-locally-with-npm)
+
+    ~~- **add provided `.env` on Eclass to root directory after cloning repo and skip step 2**~~
+    ~~- If you don't see the `.env` file after downloading from eclass, make sure hidden files are enabled in your file explorer.~~
+    - ***.env is now provided in the repo, skip .env related steps***
 
 # Step-by-Step Guide to Run the E-Commerce Project Docker Images Locally
 ### **Install and Run Docker Desktop**  
@@ -63,6 +66,55 @@ docker rm ecommerce-frontend ecommerce-backend
 docker network rm ecommerce-network
 ```
 
+# Run Locally with npm
+
+## Prerequisites
+- Node.js (v18 or higher)
+- npm (v9 or higher)
+- MongoDB connection string (provided in `.env` file)
+
+## Backend Setup
+1. Navigate to the backend directory:
+```bash
+cd backend
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the backend server:
+```bash
+npm run dev
+```
+
+The backend server will start on http://localhost:5000
+
+## Frontend Setup
+1. In a new terminal, navigate to the frontend directory:
+```bash
+cd frontend
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the frontend development server:
+```bash
+npm run dev
+```
+
+The frontend will be available at http://localhost:5173
+Access the admin panel at http://localhost:5173/admin.html
+
+**Note**: Remember to:
+- Have the `.env` file in the root directory with the required environment variables
+- Start both backend and frontend servers
+- The only admin entry point is `/admin.html`, refreshing on other admin pages will result in a 404 error
+- Navigate only using the sidebar buttons in the admin panel
 
 # Prerequisites for Local Development
 - Install Docker Desktop (or Docker Engine for Linux):
