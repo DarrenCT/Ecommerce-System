@@ -1,9 +1,10 @@
 # E-Commerce System
 
-This is a simple e-commerce application built using the MERN stack (MongoDB, Express.js, React, and Node.js). The backend is built using Node.js with Express, and the frontend is built using Vite (React).
-
-## Features
-
+## Quick Links
+- [Run Docker Images Locally](#step-by-step-guide-to-run-the-e-commerce-project-docker-images-locally)
+- [Run Code Locally](#run-code-locally)
+    - **add provided `.env` on Eclass to root directory after cloning repo and skip step 2**
+    - If you don't see the `.env` file after downloading from eclass, make sure hidden files are enabled in your file explorer.
 
 # Step-by-Step Guide to Run the E-Commerce Project Docker Images Locally
 ### **Install and Run Docker Desktop**  
@@ -63,20 +64,19 @@ docker network rm ecommerce-network
 ```
 
 
-## Prerequisites for Local Development
+# Prerequisites for Local Development
 - Install Docker Desktop (or Docker Engine for Linux):
   - [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - Install Docker Compose (included in Docker Desktop for Windows/Mac)
 
-## Local Development Setup
+# Run Code Locally
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/E-Commerce-System.git
-cd E-Commerce-System
+git clone https://github.com/DarrenCT/Ecommerce-System.git
 ```
 
-2. Create environment files
+2. Create environment files (skip if .env provided)
    - Create `.env` file in the root directory with your MongoDB connection string:
 ```
 MONGO_URI=your_mongodb_connection_string
@@ -97,12 +97,7 @@ This will:
     - **Navigate only using the sidebar buttons.**
 - Enable hot-reload for both frontend and backend development
 
-4. View logs (optional)
-```bash
-docker compose logs -f
-```
-
-5. Stop the application
+4. Stop the application
 ```bash
 docker compose down
 ```
